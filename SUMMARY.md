@@ -18,3 +18,7 @@
 * [AFL Whitepaper](fuzz/afl-whitepaper.md)
 * [AFL-Source-Code-Reading](fuzz/afl-source-code-reading.md)
 * [AI with Fuzzing](fuzz/ai-with-fuzzing.md)
+
+***
+
+* [Vulnerability Discovery](vulnerability-discovery.md)
