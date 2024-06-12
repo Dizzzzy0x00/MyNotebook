@@ -43,3 +43,47 @@ F:\AFL\winafl-master\build32>cmake --build . --config Release
 安装完成以后的WinAFL release如下：
 
 <figure><img src="../.gitbook/assets/d9fba4346ec741eb99a34cbb05d4e83.png" alt=""><figcaption></figcaption></figure>
+
+进行测试，这里尝试对test\_gdiplus.exe进行插桩并fuzz：
+
+```
+-i //存放样本的目录
+-o //保存输出数据,包括 crash文件、测试用例等
+-D //DynamoRIO的路径 (drrun, drconfig)
+-t msec //每一次样本执行的超时时间
+第一个"--"分割符	//后面跟的是插桩的参数
+第二个"--"分割符	//后面跟的是目标程序的参数
+@@ //引用 -i 参数的中的测试用例
+```
+
+```bash
+F:\AFL\winafl-master\build32\bin\Release>F:\DynamoRIO-Windows-10.0.0\bin32\drrun.exe -c winafl.dll -debug -target_module test_gdiplus.exe -target_offset 0x10b0  -fuzz_iterations 5 -nargs 2  -- test_gdiplus.exe not_kitty.bmp
+#创建in和out目录，存放输入种子in和输出out，in文件夹中要存放一个测试初始用例，这里用的testcase里面的bmp
+F:\AFL\winafl-master\build32\bin\Release>.\afl-fuzz.exe  -debug  -i  in -o out -D F:\DynamoRIO-Windows-10.0.0\bin32 -t 20000  -- -coverage_module  test_gdiplus.dll   -coverage_module WindowsCodecs.dll -fuzz_iterations 5 -target_module test_gdiplus.exe -target_offset 0x10b0 -nargs 2  -- test_gdiplus.exe @@
+```
+
+结果：成功插桩，成功fuzz：
+
+<figure><img src="../.gitbook/assets/3a1b68558aa1e9a96cbfb5e1d6ecab1.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/1ba4ecd2561b16e4594afe043a1fe69.png" alt=""><figcaption></figcaption></figure>
+
+```
+WinAFL监控参数说明：
+Process timing		//Fuzzer运行时长、以及距离最近发现的路径、崩溃和挂起经过了多长时间
+Overall results		//Fuzzer当前状态的概述
+Cycle progress		//当前Fuzz的进展
+Map coverage		//目标二进制文件中的插桩代码所观察到覆盖范围的细节
+Stage progress		//Fuzzer现在正在执行的文件变异策略、执行次数和执行速度
+Findings in depth	//有关我们找到的执行路径，异常和挂起数量的信息
+Fuzzing strategy yields	//关于突变策略产生的最新行为和结果的详细信息
+Path geometry		//有关Fuzzer找到的执行路径的信息
+CPU load			//CPU利用率
+```
+
+注意，根据其他师傅博客中的提示“ 第一次对目标程序进行Fuzz时需要加上debug，方便出错时进行错误的排查，确认无误后**记得取消debug参数，否则会极大影响运行效率**”
+
+ok，至此WinAFL(32)环境搭建完成
+
+
+
