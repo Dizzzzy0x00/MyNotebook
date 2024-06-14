@@ -4,6 +4,16 @@ description: NEUZZ
 
 # AI with Fuzzing
 
+在深度学习中，梯度被用来度量一个变量在改变量时，输出函数值的变化率。换言之，对于神经网络，梯度可以理解为每个输入变量对于预测结果的贡献。
+
+如果一个输入变量的梯度很大，那说明这个变量对于预测结果的影响很大，改变它会使结果产生显著的变化。 在模糊测试的场景中，神经网络的输入是种子文件的一个向量表示，每个元素对应文件的一个字节，输出是所有边被覆盖的概率。
+
+神经网络会根据训练从输入向量中学习出对结果影响显著的因素。 通过计算每个输入元素对输出（这里是特定边的覆盖概率）的梯度，可以得到输入的哪些部分（在这里是种子文件的哪些字节）对于覆盖这条边的影响最大。
+
+这样，在选择进行模糊测试变异，我们就可以首要考虑那些对应的梯度值较大的输入元素，也就是说，在进行模糊输入时，优先对这些部分进行修改。 这种基于梯度的方法使得我们可以更聪明地进行模糊测试，而不是简单地随机或者穷举所有可能的输入。可以更有效地利用有限的计算资源，提高发现软件错误的效率。
+
+
+
 ## NEUZZ
 
 Paper：NEUZZ: Efficient Fuzzing with Neural Program Smoothing
@@ -903,11 +913,11 @@ PreFuzz 首先通过应用所有现有种子作为训练集来训练神经网络
 
 
 
-### Prefuzz源码阅读
 
 
 
-#### fuzz.c
+
+### Prefuzz源码阅读-fuzz.c
 
 基本代码流程和Neuzz一模一样，在上面进行了改动和新增
 
@@ -976,7 +986,7 @@ void parse_grads_havoc(char * str, double * array, int lenn) {
 
 **UR(u32 limit)**
 
-这里不是很懂为什么要定义这个函数，在neuzz中`choose_block_len(u32 limit)`函数直接`switch ((random()%3))`，而Prefuzz中`switch (UR(3))`，感觉这个函数的设计多余
+这里不是很懂为什么要定义这个函数，在neuzz中`choose_block_len(u32 limit)`函数直接`switch ((random()%3))`，而Prefuzz中`switch (UR(3))`，可能是增加代码封装性
 
 ```c
 /* Generate a random number (from 0 to limit - 1). This may
@@ -999,7 +1009,7 @@ static inline u32 UR(u32 limit) {
 
 #### save\_if\_interesting
 
-在Neuzz中这一部分没有封装为一个函数，阅读Neuzz源码时觉得这一部分代码确实冗余
+在Neuzz中这一部分没有封装为一个函数，阅读Neuzz源码时觉得这一部分代码确实冗余，实际逻辑是相同的
 
 ```c
 void save_if_interesting(char* out_buf, size_t length, char* out_dir) {
@@ -1304,3 +1314,199 @@ void fuzz_lop(int sock) {
     fclose(stream);
 }
 ```
+
+### Prefuzz源码阅读-nn.py
+
+```
+bitmap_ec存储种子文件到边覆盖的映射；
+label_index存储边到位图索引的映射；
+correspond_dict存储边到对应边的映射；
+Class FuzzDataSet 
+这个类提取位图样本。
+位图样本来自种子文件，并使用其覆盖的边缘信息
+
+Class FuzzNet: 
+使用 PyTorch 库构建的神经网络模型。
+包含两个线性层，中间有一个ReLU激活函数，输出通过一个Sigmoid函数来得到结果
+
+construct_bitmap
+这个函数用于构造位图。起初，它会获得种子文件的边缘覆盖信息，用于构造原始位图，
+然后完成标签缩减，删除重复列，并更新标签索引
+
+vectorize_file: 
+这个函数将文件转化成一个数值向量。
+这个向量代表了文件中字节的值，字节的值被缩放到0到1的范围内。
+```
+
+根据论文中的描述，在Prefuzz中使用了“资源高效的边选择机制”，旨在识别值得探索的边，以便稍后选择和改变其相应的字节。具体地说，一个边已经探索的“兄弟”边越多，通过给定边的梯度计算探索新的“兄弟”边的可能性就越小。
+
+> PreFuzz first trains a neural network model by applying all the existing seeds as the training set. Next, PreFuzz adopts a resource-efficient edge selection mechanism to select edges for gradient computation. Then, the gradient information is utilized to generate mutants for fuzzing
+
+```python
+#在Neuzz 的nn.py中,对于边选择机制采用完全随机的算法：
+def select_edges(fuzzData, edge_num):
+    # random selection mechanism
+    alter_seeds = list()
+    alter_edges = np.random.choice(fuzzData.edge_size, edge_num)
+    
+    for edge in alter_edges:
+        idx_list = np.where(fuzzData.bitmap[:,edge] == 1)[0]
+        alter_seeds.append(np.random.choice(idx_list, 1, replace=False)[0])
+    
+    interested_indice = zip(alter_edges.tolist(), alter_seeds)
+    return interested_indice
+
+#而在PreFuzz中，0.1的概率使用随机算法，其余0.9使用资源高效的边选择机制：
+def select_edges(fuzzData, edge_num):
+    # candidate edges
+    if np.random.rand() < 0.1:
+    #0.1概率使用随机选择算法
+        # random selection mechanism
+        alter_edges = np.random.choice(fuzzData.edge_size, edge_num)
+    else:
+        candidate_set = set()
+        for edge in label_index.keys():
+            if check_select_edge(edge):
+            #由算法进行选择更加值得继续探索的边
+                candidate_set.add(label_index[edge])
+        replace_flag = True if len(candidate_set) < edge_num else False
+        alter_edges = np.random.choice(list(candidate_set), edge_num, replace=replace_flag)
+
+    alter_seeds = list()
+    for edge in alter_edges:
+        idx_list = np.where(fuzzData.bitmap[:,edge] == 1)[0]
+        alter_seeds.append(random.choice(idx_list))
+    
+    interested_indice = zip(alter_edges.tolist(), alter_seeds)
+    return interested_indice
+
+```
+
+接下来就看看资源有效的边选择机制实现代码:
+
+1. 检查给定的边（edge）是否在`correspond_dict`中。如果不在，说明这个边没有与之关联的其他边（“兄弟边”），那么就返回`True`，选择这个边。
+2. 如果给定的边在`correspond_dict`中，那么就获取这个边所有的对应边作为`correspond_set`。如果这个集合是空的，同样返回`True`，选择这个边。
+3. 如果`correspond_set`不为空，那么就遍历这个集合，统计其中已经被探索过的边的数量（`cover_cnt`）。这里的已探索是指这个边在`label_index`中。
+4. 计算已探索的边的数量与所有对应边的总数量的比值。如果这个比值高于预设的`SELECT_RATIO`，则返回`False`，表示不选择这个边；否则返回`True`，选择这个边。
+
+```python
+def check_select_edge(edge_id):
+    #检查给定的边（edge）是否在correspond_dict中。如果不在，说明这个边没有与之关联的其他边（“兄弟边”），那么就返回True，选择这个边
+    if edge_id not in correspond_dict.keys():
+        return True
+        #为什么这种情况返回True：
+        #如果一个边在 correspond_dict 字典中没有键，
+        #那就意味着它没有对应的“兄弟”边
+        #那么可能这个边是在控制流图中的一条单独的路径或者是一个条件判断的分支里只有一条路径
+        #对此的理解：
+        #没有“兄弟”边，也就没有别的边可以和它争夺覆盖资源，
+        #也就避免了过度测试某一特定路径的问题。此外，如果一条边没有任何“兄弟”边，那么意味着它在代码结构中是相对独立的，
+        #探索这样的边更可能找出程序中的新行为和潜在错误，因此值得优先探索。
+   
+    #如果给定的边在correspond_dict中，那么就获取这个边所有的对应边作为correspond_set。如果这个集合是空的，同样返回True，选择这个边。
+    correspond_set = correspond_dict[edge_id]
+    if len(correspond_set) == 0:
+        return True
+
+    #如果correspond_set不为空，那么就遍历这个集合，统计其中已经被探索过的边的数量（cover_cnt）。这里的已探索是指这个边在label_index中  
+    cover_cnt = 0
+    for ce in correspond_set:
+        if ce in label_index.keys():
+            cover_cnt += 1
+    #计算已探索的边的数量与所有对应边的总数量的比值。如果这个比值高于预设的SELECT_RATIO，则返回False，表示不选择这个边；否则返回True，选择这个边
+    if cover_cnt / len(correspond_set) > SELECT_RATIO:
+        return False
+    return True
+```
+
+这里对`correspond_dict`再次进行理解：对于在代码结构中形如if, switch等具有多个分支的结构，我们可以把这些分支视为彼此的"兄弟"，它们对应于QC（Quantity of Controllability，可控制数量）空间中的不同半径（Radius）。\
+例如，在基于控制流图（CFG, Control Flow Graph）的测试用例生成中，对于这些多分支结构，我们通常会记录下每个分支对应的边（Edge），并将它们视为同一组的，用来记录和参考它们在测试用例生成过程中的覆盖状态。\
+在这个`correspond_dict`字典中，每个键（key）是一个边的标识符，对应的值（value）是一个集合，包含了所有与此边是“兄弟”关系的其他边。
+
+
+
+对于的构造如下，可以看到是FlowBuilder(program\_path)中实现的，这个后续在[flow.py](ai-with-fuzzing.md#prefuzz-yuan-ma-yue-du-flow.py)中分析：
+
+```python
+def init_env(program_path):
+    global correspond_dict
+    os.path.isdir("./vari_seeds/")  or  os.makedirs("./vari_seeds")
+    os.path.isdir("./havoc_seeds/") or  os.makedirs("./havoc_seeds")
+    os.path.isdir("./crashes/")     or  os.makedirs("./crashes")
+
+    # construct edge corresponding dict
+    logger.info(f'Construct the control-flow')
+    flow = FlowBuilder(program_path)
+    with open(flow.correspond_target, 'r') as fopen:
+        correspond_dict = eval(fopen.readline())
+    # initial gradients
+    nn_lop(50, 100)
+```
+
+最后还有一些输出梯度信息的函数：
+
+```python
+def gen_adv(fuzzNet, fuzzData, edge_idx, seed_name):
+    #生成一条边对应的梯度
+    x = vectorize_file(seed_name, fuzzData.seed_size).to(device)#将种子文件向量化
+    x = Variable(x, requires_grad=True)#把向量x包装为一个PyTorch Variable对象，并设置其可以进行梯度计算
+    
+    y = x
+    for layer in list(fuzzNet.layers)[:-1]:
+        y = layer(y)
+
+    grads = torch.autograd.grad(y[edge_idx], x)[0]  #在得到网络输出y后，计算出网络输出中的第edge_idx项关于输入x的梯度
+    grads = grads.cpu().numpy()
+    # sort byte indix desc to the gradients
+    #把梯度从设备上转回CPU，并转换为numpy格式的数据，对梯度取绝对值grads_abs，将梯度的序号进行排序并返回索引idx，以及梯度的符号sign
+    grads_abs = np.absolute(grads)
+    idx = np.argsort(-grads_abs)
+    sign = np.sign(grads)[idx]
+
+    return idx, sign, grads_abs
+
+
+def gen_grads(fuzzNet, fuzzData, grads_num):
+    #通过select_edges选出需要探索的边。然后，对这些边调用gen_adv方法生成其关于种子输入的梯度。最后，把梯度的序号、符号和对应的种子名称写入文件
+    # edge select strategy
+    interested_indice = select_edges(fuzzData, grads_num)
+    #写入梯度信息到gradient_info_p文件中
+    fopen = open('gradient_info_p', 'w')
+    cnt, total = 0, grads_num
+    for edge_idx, seed_idx in interested_indice:
+        seed_name = fuzzData.seed_list[seed_idx]
+        idx, sign, _ = gen_adv(fuzzNet, fuzzData, edge_idx, seed_name)
+        idx = [str(ele) for ele in idx]
+        sign = [str(int(ele)) for ele in sign]
+        fopen.write(','.join(idx) + '|' + ','.join(sign) + '|' + seed_name + '\n')
+
+        if cnt % 10 == 0:
+            print(f'generate gradients {str(round(cnt / total, 5) * 100)[:5]}%', end='\r')
+        cnt += 1
+
+    logger.info('Gradients number:' + str(grads_num))
+    fopen.close()
+
+
+def gen_grads_havoc(fuzzNet, fuzzData, grads_num):
+    # edge select strategy
+    interested_indice = select_edges(fuzzData, grads_num)
+
+    fopen = open('gradient_info_havoc_p', 'w')
+    cnt, total = 0, grads_num
+    for edge_idx, seed_idx in interested_indice:
+        seed_name = fuzzData.seed_list[seed_idx]
+        _, _, grads = gen_adv(fuzzNet, fuzzData, edge_idx, seed_name)
+        grads = [str(int(ele * 10000)) for ele in grads]
+        fopen.write(','.join(grads) + '|' + seed_name + '\n')
+
+        if cnt % 10 == 0:
+            print(f'generate gradients for havoc {str(round(cnt / total, 5) * 100)[:5]}%', end='\r')
+        cnt += 1
+
+    logger.info('Gradients number for havoc:' + str(grads_num))
+    fopen.close()
+```
+
+### Prefuzz源码阅读-flow.py
+

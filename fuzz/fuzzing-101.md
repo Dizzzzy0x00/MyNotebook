@@ -85,5 +85,9 @@ CPU load			//CPU利用率
 
 ok，至此WinAFL(32)环境搭建完成
 
+### Fuzzing 7-Zip
 
+下载源码（这里我选择最新的 7-Zip 23.01（2023-06-20） 7-Zip 源代码 ）：
+
+{% embed url="https://sparanoid.com/lab/7z/download.html" %}
 
