@@ -8,9 +8,9 @@ description: NEUZZ
 
 如果一个输入变量的梯度很大，那说明这个变量对于预测结果的影响很大，改变它会使结果产生显著的变化。 在模糊测试的场景中，神经网络的输入是种子文件的一个向量表示，每个元素对应文件的一个字节，输出是所有边被覆盖的概率。
 
-神经网络会根据训练从输入向量中学习出对结果影响显著的因素。 通过计算每个输入元素对输出（这里是特定边的覆盖概率）的梯度，可以得到输入的哪些部分（在这里是种子文件的哪些字节）对于覆盖这条边的影响最大。
+神经网络会根据训练从输入向量中学习出对结果影响显著的因素。 通过计算每个输入元素对输出（这里是特定边的覆盖概率）的梯度，可以得到输入的哪些部分（在这里是种子文件的那些字节）对于覆盖这条边的影响最大。
 
-这样，在选择进行模糊测试变异，我们就可以首要考虑那些对应的梯度值较大的输入元素，也就是说，在进行模糊输入时，优先对这些部分进行修改。 这种基于梯度的方法使得我们可以更聪明地进行模糊测试，而不是简单地随机或者穷举所有可能的输入。可以更有效地利用有限的计算资源，提高发现软件错误的效率。
+这样，在选择进行模糊测试变异，我们就可以首要考虑那些对应的梯度值较大的输入元素，也就是说，在进行模糊输入时，优先对这些部分进行修改。 这种基于梯度的方法使得我们可以更高效地进行模糊测试，而不是简单地随机或者穷举所有可能的输入。可以更有效地利用有限的计算资源，提高发现软件错误的效率。
 
 
 
@@ -1510,3 +1510,198 @@ def gen_grads_havoc(fuzzNet, fuzzData, grads_num):
 
 ### Prefuzz源码阅读-flow.py
 
+首先先看类的定义，主要是用于构建和管理程序的控制流信息：
+
+```python
+class FlowBuilder:
+    def __init__(self, bin_file: str):
+        self.bin_file = bin_file #fuzz的二进制程序
+
+        self.cf_dir = './flow'#存储结果的目录名
+        #一系列以 _target 结尾的成员是存储结果的文件路径，用于在后面的分析中产生各种结果文件。
+        self.target = bin_file[bin_file.rfind('/') + 1:]
+        self.edge_target = f'{self.cf_dir}/edge-{self.target}'
+        self.dump_target = f'{self.cf_dir}/dump-{self.target}'
+        self.pc_target = f'{self.cf_dir}/pc-{self.target}'
+        self.block_target = f'{self.cf_dir}/block-{self.target}'
+        self.control_flow_target = f'{self.cf_dir}/flow-{self.target}'
+        self.correspond_target = f'{self.cf_dir}/correspond-{self.target}'
+        
+        #两个字典分别存储每个程序计数器地址（PC）和代码块之后的PC地址或代码块。
+        self.next_pc = dict()
+        self.next_block = dict()
+        #存储程序的各种映射信息
+        #如标签到地址、地址到标签、地址到代码块、地址到汇编的映射。
+        self.label2addr = dict()
+        self.addr2label = dict()
+        self.addr2block = dict()
+        self.addr2asm = dict()
+        self.nodes = set()
+        #存储所有的节点信息
+
+        self.min_asm_addr = 0xffffffff
+        self.max_asm_addr = -1
+        #存储汇编地址的最小值和最大值，初始化为最大整数值和最小整数值。
+        self.init_work_env()
+        self.init_next_pc()
+        
+        #初始化next_block字典，提取程序中每个代码块后面的代码块信息。
+        self.init_next_block()
+        
+        self.dump_control_flow()#将控制流信息保存到文件
+        self.dump_correspond()#将一些相关信息（可能是一些映射关系）保存到文件中
+
+```
+
+然后看详细的实现：
+
+在 `init_work_env` 函数中，通过运行 `objdump -d` 命令将二进制文件转储为汇编语言。每一行的格式如下：
+
+* `address: asm_code`
+
+举个实际的例子：
+
+```armasm
+0000000000401240 <show>:
+  401240:	48 8d a4 24 68 ff ff 	lea    -0x98(%rsp),%rsp
+  401247:	ff 
+  401248:	48 89 14 24          	mov    %rdx,(%rsp)
+  40124c:	48 89 4c 24 08       	mov    %rcx,0x8(%rsp)
+  401251:	48 89 44 24 10       	mov    %rax,0x10(%rsp)
+  401256:	48 c7 c1 1e b8 00 00 	mov    $0xb81e,%rcx
+  40125d:	e8 36 00 00 00       	callq  401298 <__afl_maybe_log>
+  401262:	48 8b 44 24 10       	mov    0x10(%rsp),%rax
+  401267:	48 8b 4c 24 08       	mov    0x8(%rsp),%rcx
+  40126c:	48 8b 14 24          	mov    (%rsp),%rdx
+  401270:	48 8d a4 24 98 00 00 	lea    0x98(%rsp),%rsp
+  401277:	00 
+  401278:	8d 14 37             	lea    (%rdi,%rsi,1),%edx
+  40127b:	89 f0                	mov    %esi,%eax
+  40127d:	29 f8                	sub    %edi,%eax
+  40127f:	39 f7                	cmp    %esi,%edi
+  401281:	be 04 20 40 00       	mov    $0x402004,%esi
+  401286:	0f 4e d0             	cmovle %eax,%edx
+  401289:	bf 01 00 00 00       	mov    $0x1,%edi
+  40128e:	31 c0                	xor    %eax,%eax
+  401290:	e9 eb fd ff ff       	jmpq   401080 <__printf_chk@plt>
+  401295:	0f 1f 00             	nopl   (%rax)
+
+0000000000401298 <__afl_maybe_log>:
+  401298:	9f                   	lahf   
+  401299:	0f 90 c0             	seto   %al
+  40129c:	48 8b 15 dd 2d 00 00 	mov    0x2ddd(%rip),%rdx        # 404080 <__afl_area_ptr>
+  4012a3:	48 85 d2             	test   %rdx,%rdx
+  4012a6:	74 20                	je     4012c8 <__afl_setup>
+
+```
+
+汇编行被读取后进行解析，将地址（`addr`）和对应的汇编指令（`asm_code`）保存在 `addr2asm` 字典中。同时，如果行中包含 `'__afl_maybe_log'`例如`40125d: e8 36 00 00 00 callq 401298 <__afl_maybe_log>`那么这个地址`e8 36 00 00 00`也被标记为一个节点（`Node`），保存在 `addr2block` 字典和 `nodes` 集合中
+
+```python
+def init_work_env(self):
+        if not os.path.exists(self.cf_dir):
+            os.mkdir(self.cf_dir)
+        if not os.path.exists(self.dump_target):
+        #运行 objdump -d 命令将二进制文件转储为汇编语言，存储到self.dump_target文件
+            cmd = f"objdump -d {self.bin_file} > {self.dump_target}"
+            os.system(cmd)
+        if os.path.exists(self.control_flow_target):
+            return
+        with open(self.dump_target) as f:
+        #汇编行读取
+            orig_codes = f.readlines()
+            for i in range(len(orig_codes)):
+                line = orig_codes[i]
+                if not utils.is_valid_line(line):
+                    continue
+                if line[0] == ' ':
+                    tmp = line.split(':')
+                    addr = int(tmp[0], 16)
+                    #将地址（addr）和对应的汇编指令（asm_code）保存在 addr2asm 字典中
+                    self.addr2asm[addr] = tmp[1].strip()
+                    if addr > self.max_asm_addr:
+                        self.max_asm_addr = addr
+                    if addr < self.min_asm_addr:
+                        self.min_asm_addr = addr
+                    self.next_block[addr] = set()
+                    #如果行中包含 '__afl_maybe_log'
+                    #那么这个地址也被标记为一个节点（Node）
+                    if '__afl_maybe_log' in line:
+                        reg_exp = r'0x(.*),'
+                        match_obj = re.search(reg_exp, orig_codes[i - 1])
+                        if not match_obj:
+                            print(f"[-]: fatal error: unable to recognize afl_maybe_log id of: {orig_codes[i - 1]}")
+                            exit(-1)
+                        #将相关信息保存在 addr2block 字典和 nodes 集合中
+                        node = Node(int(match_obj.group(1), 16), addr)
+                        self.addr2block[addr] = node
+                        self.next_block[addr].add(addr)
+                        self.nodes.add(node)
+                if line[-2] == ':':
+                    tmp = line.split(' ')
+                    addr = int(tmp[0], 16)
+                    label = tmp[1][:-2]
+                    self.addr2label[addr] = label
+                    self.label2addr[label] = addr
+```
+
+init\_work\_env完成了二进制到汇编的读取解析以后，init\_next\_pc()函数负责遍历已经解析的所有的汇编指令，然后为每个地址（PC）计算和存储下一步可能跳转到的地址。在主循环中，遍历从最小汇编地址到最大汇编地址的所有地址。这个过程分为几个步骤：
+
+首先，下一个PC的地址被初始化为当前PC的地址加一。然后，循环增加下一个PC地址，直到遇到在 `addr2asm` 字典中已经存在的地址（也就是一个有效的汇编指令的地址）
+
+对于当前PC地址对应的汇编指令，会根据汇编指令的类型来决定下一个PC地址是什么，然后将它保存在 `next_pc` 字典中：
+
+* 如果是返回指令（`ret`），说明这条指令之后的地址并不重要，不需要被记录，所以设置为空。
+* 如果含有`@plt`或`__afl_maybe_log`，那么默认下一个地址为当前地址加一，保存的是连续的地址。
+* 如果指令是函数调用(`call`)或无条件跳转(`jmp`)，需要从汇编代码中提取跳转的目标地址，将目标地址作为下一个PC地址。
+* 如果是条件跳转指令（例如 `jz`，`jnz` 等等），则需要提取跳转的目标地址，这时下一个PC地址可能有两个，一个是紧接着的地址，另一个是跳转的目标地址。保存的是两个可能的地址。
+
+这里回想南京大学《软件分析》课程里面关于CFG的构建，感觉基本过程相似，下面是这部分的笔记，感谢师傅的整理：
+
+{% embed url="https://ranger-nju.gitbook.io/static-program-analysis-book/ch1/2intermediaterepresentation" %}
+
+控制流分析（Control Flow Analysis）通常指的是构建控制流图（Control Flow Graph, CFG），并以 CFG 作为基础结构进行静态分析的过程。
+
+<figure><img src="https://ranger-nju.gitbook.io/~gitbook/image?url=https%3A%2F%2F4182415683-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MJC1RRYQ991XoNX219t%252Fuploads%252Fgit-blob-73fd14640cb827df53814c02aa8df40d8c70a52e%252Fimage-20210909193624370.png%3Falt%3Dmedia&#x26;width=300&#x26;dpr=4&#x26;quality=100&#x26;sign=9a337ec4bae10798bba1796230f1fcac6657a44d3c61314446d71cf6b0172ba9" alt=""><figcaption></figcaption></figure>
+
+CFG 的一个结点可以是一条单独的 3AC，但是更常见的是一个基本块（Basic Block）。所谓基本块，就是满足以下性质的连续 3AC：
+
+* 只能从块的第一条指令进入。
+* 只能从块的最后一条指令离开。
+
+<figure><img src="https://ranger-nju.gitbook.io/~gitbook/image?url=https%3A%2F%2F4182415683-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MJC1RRYQ991XoNX219t%252Fuploads%252Fgit-blob-ff324fb2d3988f335fd42f30dceff16c9c98a9f3%252Fimage-20210909193825373.png%3Falt%3Dmedia&#x26;width=300&#x26;dpr=4&#x26;quality=100&#x26;sign=f9658fd1efab1a2abbfe0790450f9298c190b26218b79094908a5bc56f025594" alt=""><figcaption></figcaption></figure>
+
+如何构建一个基本块呢？
+
+* 输入：程序 P 的一系列 3AC
+* 输出：程序 P 的基本块
+* 方法
+  1. 决定 P 的 leaders
+     * P 的第一条指令就是一个 leader
+     * 跳转的目标指令是一个 leader
+     * 跳转指令的后一条指令，也是一个 leader
+  2. 构建 P 的基本块
+     * 一个基本块就是一个 leader 及其后续直到下一个 leader 前的所有指令。
+
+<figure><img src="https://ranger-nju.gitbook.io/~gitbook/image?url=https%3A%2F%2F4182415683-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MJC1RRYQ991XoNX219t%252Fuploads%252Fgit-blob-54245164dfcbb10013b4dcf0245b82da179dcb1b%252Fimage-20210909194221057.png%3Falt%3Dmedia&#x26;width=300&#x26;dpr=4&#x26;quality=100&#x26;sign=b9ad8a1b2507af83cc1ca51f16051fa9d8d2ddb3dfb93dfe47e20967b110d437" alt=""><figcaption></figcaption></figure>
+
+除了基本块，CFG 中还会有块到块的边。块 A 和块 B 之间有一条边，当且仅当：
+
+* A 的末尾有一条指向了 B 开头的跳转指令。
+* A 的末尾紧接着 B 的开头，且 A 的末尾不是一条无条件跳转指令。
+
+<figure><img src="https://ranger-nju.gitbook.io/~gitbook/image?url=https%3A%2F%2F4182415683-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MJC1RRYQ991XoNX219t%252Fuploads%252Fgit-blob-4d43ad5536ef3b00e5c5cd80595dae602f64394c%252Fimage-20210909194550772.png%3Falt%3Dmedia&#x26;width=300&#x26;dpr=4&#x26;quality=100&#x26;sign=4fe65983e45b37c1723e28471a4a9075fb9fe0d859c09fe372ef047133d82278" alt=""><figcaption></figcaption></figure>
+
+注意到每个基本块和开头指令的标号唯一对应，因此很自然地，我们可以将跳转指令的目标改为基本块的标号而非指令标号：
+
+<figure><img src="https://ranger-nju.gitbook.io/~gitbook/image?url=https%3A%2F%2F4182415683-files.gitbook.io%2F%7E%2Ffiles%2Fv0%2Fb%2Fgitbook-x-prod.appspot.com%2Fo%2Fspaces%252F-MJC1RRYQ991XoNX219t%252Fuploads%252Fgit-blob-5e3b46796c3711c5dacea1805b4a9c99dd3c5431%252Fimage-20210909194912657.png%3Falt%3Dmedia&#x26;width=300&#x26;dpr=4&#x26;quality=100&#x26;sign=734c3a3fadfdb7d198165415bc5c7f6b1532ffab997106d52689e134c163377c" alt=""><figcaption></figcaption></figure>
+
+有了这些定义，我们就可以了解一些概念：
+
+* 若 A -> B，则我们说 A 是 B 的前驱（predecessor），B 是 A 的后继（successor）
+* 除了构建好的基本块，我们还会额外添加两个结点，「入口（Entry）」和「出口（Exit）」
+  * 这两个结点不对应任何 IR
+  * 入口有一条边指向 IR 中的第一条指令
+  * 如果一个基本块的最后一条指令会让程序离开这段 IR，那么这个基本块就会有一条边指向出口。
+
+这样，我们就完成了一个控制流图的构建
