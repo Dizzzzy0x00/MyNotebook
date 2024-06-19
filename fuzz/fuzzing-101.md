@@ -6,6 +6,67 @@ description: https://github.com/antonio-morales/Fuzzing101
 
 {% embed url="https://github.com/antonio-morales/Fuzzing101" %}
 
+## Exercise 1 - Xpdf
+
+{% embed url="https://github.com/antonio-morales/Fuzzing101/tree/main/Exercise%201" %}
+
+详细的过程在Fuzzing101的readme文档中有详细介绍这里就带过
+
+```
+mkdir fuzzing_xpdf && cd fuzzing_xpdf/
+wget https://dl.xpdfreader.com/old/xpdf-3.02.tar.gz
+tar -xvzf xpdf-3.02.tar.gz
+
+#构建Xpdf并进行测试：
+cd xpdf-3.02
+sudo apt update && sudo apt install -y build-essential gcc
+./configure --prefix="$HOME/fuzzing_xpdf/install/"
+make
+make install
+```
+
+AFL++安装
+
+```
+sudo apt-get update
+sudo apt-get install -y build-essential python3-dev automake git flex bison libglib2.0-dev libpixman-1-dev python3-setuptools
+sudo apt-get install -y lld-11 llvm-11 llvm-11-dev clang-11 || sudo apt-get install -y lld llvm llvm-dev clang 
+sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+sudo apt-get install -y gcc-$(gcc --version|head -n1|sed 's/.* //'|sed 's/\..*//')-plugin-dev libstdc++-$(gcc --version|head -n1|sed 's/.* //'|sed 's/\..*//')-dev
+
+
+#这里我进行了gcc版本的更新，更新以后要修改优先级：
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 1 
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 10
+
+cd $HOME
+git clone https://github.com/AFLplusplus/AFLplusplus && cd AFLplusplus
+export LLVM_CONFIG="llvm-config-11"
+make distrib
+sudo make install
+```
+
+```
+export LLVM_CONFIG="llvm-config-11"
+CC=$HOME/AFLplusplus/afl-clang-fast CXX=$HOME/AFLplusplus/afl-clang-fast++ ./configure --prefix="$HOME/Desktop/fuzzing_xpdf/install/"
+AFL_USE_ASAN=1 make
+AFL_USE_ASAN=1 make install
+```
+
+
+
+开始fuzz，由于我开启了ASAN，所以这里使用-m none取消内存限制：
+
+```
+afl-fuzz -m none -i $HOME/Desktop/fuzzing_xpdf/pdf_examples/ -o $HOME/Desktop/fuzzing_xpdf/out/ -s 123 -- $HOME/Desktop/fuzzing_xpdf/install/bin/pdftotext @@ $HOME/Desktop/fuzzing_xpdf/output
+```
+
+<figure><img src="../.gitbook/assets/f45961559ef18362c49e5b088a2dd18 (1).png" alt=""><figcaption></figcaption></figure>
+
+30分钟触发了四个crashes：
+
+<figure><img src="../.gitbook/assets/648e84a11d9a8a6cf55d618c47765cf.png" alt=""><figcaption></figcaption></figure>
+
 ## Exercise 9 - 7-Zip
 
 {% embed url="https://github.com/antonio-morales/Fuzzing101/tree/main/Exercise%209" %}
