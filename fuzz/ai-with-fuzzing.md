@@ -815,11 +815,11 @@ WU M, JIANG L, XIANG J, 等. Evaluating and improving neural program-smoothing-b
 
 需要注意的是，程序执行路径，也就是，一系列的边，可以由种子输入的字节序列决定。因此，当一个边的对应字节满足其访问条件时，就可以访问／探索这个边。否则，可以替代地访问其“兄弟”边（也就是，在一个共享的前缀边下的边）。例如，在图中，当 𝑠𝑒𝑒𝑑 \[𝑖] 的值满足 𝑒0 的访问条件时，也就是 𝑠𝑒𝑒𝑑 \[𝑖] < 1时，可以访问 𝑒0。因此，改变这个 𝑠𝑒𝑒𝑑 \[𝑖] 可以导致探索一个新的分支行为，也就是，访问 𝑒0 的“兄弟”边 𝑒1 而不是 𝑒0。
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption><p>An example of neural program-smoothing rationale</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption><p>An example of neural program-smoothing rationale</p></figcaption></figure>
 
 Neuzz和MTFuzz采用了一个迭代的训练和突变过程。在每次迭代中，它们使用实时收集到的“有趣”的种子输入（见下图中的“种子语料库”）来训练神经网络模型。注意下图也显示了Neuzz和MTFuzz采用了不同的神经网络模型。
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 Neuzz和MTFuzz随机选择一定数量的“有趣”的种子和已探索过的边界。对于每个选定的种子，它们计算**选定边向量关于所有字节的梯度**。此外，所有这些字节都根据其对应的梯度排名进行排序，然后**汇总为一个向量以供进一步突变**。特别地，Neuzz和MTFuzz划分每个选定的种子，使得前段的字节的梯度大于后段的字节，且前段包含的字节数量少于后段。因此，“有希望”的字节预计会位于前段。对于任何段𝑠𝑒𝑔，所有的字节同时进行255次突变。结果，Neuzz和MTFuzz可以探索比后段更多的前段突变空间，也就是，更积极地突变更“有希望”的字节，以探索新的分支行为。最后，经过迭代训练和突变过程后产生的所有种子都用作模糊测试的测试用例。
 
@@ -827,7 +827,7 @@ Neuzz和MTFuzz随机选择一定数量的“有趣”的种子和已探索过的
 
 ### Neuzz和MTFuzz评估实验
 
-<figure><img src="../.gitbook/assets/image (3).png" alt=""><figcaption><p>Edge coverage results of all the studied approaches</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (3) (1).png" alt=""><figcaption><p>Edge coverage results of all the studied approaches</p></figcaption></figure>
 
 皮尔逊相关系数分析Pearson Correlation Coefficient analysis
 

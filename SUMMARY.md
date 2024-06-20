@@ -24,3 +24,8 @@
 ***
 
 * [Vulnerability Discovery](vulnerability-discovery.md)
+
+## Rust
+
+* [Rust-1](rust/rust-1.md)
+* [Rust-2](rust/rust-2.md)
