@@ -211,3 +211,133 @@ fn makes_copy(some_integer: i32) { // some_integer 进入作用域
 } // 这里，some_integer 移出作用域。没有特殊之处
 
 ```
+
+如果尝试在`takes_ownership(s)`之后再次访问s，Rust就会抛出编译错误，因为s作为参数传入以后，所有权发生了转移，此时s已经不再有效
+
+既然函数调用可以转移所有权，相应的函数返回值也可以转移所有权，示例程序如下：
+
+```rust
+fn main() {
+    let s1 = gives_ownership();         // gives_ownership 将返回值转移给 s1
+
+    let s2 = String::from("hello");     // s2 进入作用域
+
+    let s3 = takes_and_gives_back(s2);  // s2 被移动到 takes_and_gives_back 中，它也将返回值移给 s3
+} // 这里，s3 移出作用域并被丢弃。s2 也移出作用域，但已被移走，所以什么也不会发生。s1 离开作用域并被丢弃
+
+fn gives_ownership() -> String {             // gives_ownership 会将返回值移动给调用它的函数
+    let some_string = String::from("yours"); // some_string 进入作用域。
+    some_string                              // 返回 some_string 并移出给调用的函数
+}
+
+// takes_and_gives_back 将传入字符串并返回该值
+fn takes_and_gives_back(a_string: String) -> String { // a_string 进入作用域
+    a_string  // 返回 a_string 并移出给调用的函数
+}
+
+```
+
+总结来说：变量的所有权总是遵循相同的模式：**将值赋给另一个变量时移动它**。当持有堆中数据值的变量**离开作用域时，其值将通过 `drop` 被清理掉**，除非数据被移动为另一个变量所有。
+
+#### 引用与借用
+
+如果我们需要在变量作为参数使用以后继续使用这个值，就意味着**需要在每一个函数中都获取所有权并接着返回所有权给另一个变量**，这是极为繁琐的，Rust 对此提供了一个不用获取所有权就可以使用值的功能，叫做**引用**（references）
+
+引用（reference）像一个指针，因为它是一个地址，我们可以由此访问储存于该地址的属于其他变量的数据。 与指针不同，引用确保指向某个特定类型的有效值。
+
+```rust
+fn main() {
+    let s1 = String::from("hello");
+
+    let len = calculate_length(&s1);//&s1创建一个 指向值 s1 的引用，但是并不拥有它
+
+    println!("The length of '{}' is {}.", s1, len);
+}
+
+fn calculate_length(s: &String) -> usize { // s 是 String 的引用
+    s.len()
+} // 这里 s 离开了作用域。但因为它并不拥有引用值的所有权，所以什么也不会发生
+
+
+```
+
+<figure><img src="../.gitbook/assets/image (79).png" alt=""><figcaption></figcaption></figure>
+
+正如变量默认是不可变的，引用也一样。（默认）不允许修改引用的值。想要修改引用的值需要**可变引用（mutable reference）**：
+
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    change(&mut s);
+}
+
+fn change(some_string: &mut String) {
+    some_string.push_str(", world");
+}
+
+```
+
+可变引用有一个很大的限制：**如果有一个对该变量的可变引用，就不能再创建对该变量的引用。**这种限制是避免**数据竞争**（data race），它可由这三个行为造成：
+
+1. 两个或更多指针同时访问同一数据。
+2. 至少有一个指针被用来写入数据。
+3. 没有同步数据访问的机制。
+
+数据竞争会导致未定义行为，难以在运行时追踪，并且难以诊断和修复；Rust 避免了这种情况的发生，因为它甚至不会编译存在数据竞争的代码
+
+在下面的示例尝试创建两个 s 的可变引用无法通过编译：
+
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &mut s;
+    let r2 = &mut s;
+
+    println!("{}, {}", r1, r2);
+}
+   //编译：
+  Compiling playground v0.0.1 (/playground)
+error[E0499]: cannot borrow `s` as mutable more than once at a time
+ --> src/main.rs:5:14
+  |
+4 |     let r1 = &mut s;
+  |              ------ first mutable borrow occurs here
+5 |     let r2 = &mut s;
+  |              ^^^^^^ second mutable borrow occurs here
+6 |
+7 |     println!("{}, {}", r1, r2);
+  |                        -- first borrow later used here
+
+For more information about this error, try `rustc --explain E0499`.
+error: could not compile `playground` (bin "playground") due to previous error
+
+```
+
+此外，也不能在拥有不可变引用的同时拥有可变引用
+
+```rust
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &s; // 没问题
+    let r2 = &s; // 没问题
+    let r3 = &mut s; // 大问题
+
+    println!("{}, {}, and {}", r1, r2, r3);
+}
+//但是r1和r2所有权移出作用域以后就可以创建新的可变引用了：
+fn main() {
+    let mut s = String::from("hello");
+
+    let r1 = &s; // 没问题
+    let r2 = &s; // 没问题
+    println!("{} and {}", r1, r2);
+    // 此位置之后 r1 和 r2 不再使用
+
+    let r3 = &mut s; // 没问题
+    println!("{}", r3);
+}
+
+```
