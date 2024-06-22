@@ -1,6 +1,6 @@
 ---
-description: 由于一些原因开始学习Rust，发现这个语言和c的区别并不小，于是打算开个笔记记录一下，哈哈就是一直在开坑的路上
-cover: ../.gitbook/assets/微信图片_20240601094138.jpg
+description: 由于一些原因开始学习Rust，发现这个语言很有意思，于是打算开个笔记记录一下，哈哈就是一直在开坑的路上
+cover: ../.gitbook/assets/01.jpg
 coverY: 0
 layout:
   cover:

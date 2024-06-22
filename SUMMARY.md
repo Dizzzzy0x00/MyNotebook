@@ -8,6 +8,13 @@
 * [Pytorch Notebook](pytorch-notebook.md)
 * [NISP二级\&hvv](nisp-er-ji-hvv.md)
 * [Software Security](software-security.md)
+* [Vulnerability Discovery](vulnerability-discovery.md)
+
+## Rust
+
+* [Rust-1](rust/rust-1.md)
+* [Rust-2](rust/rust-2.md)
+* [Rust-3](rust/rust-3.md)
 
 ## Fuzz
 
@@ -20,12 +27,3 @@
 * [AI with Fuzzing](fuzz/ai-with-fuzzing.md)
 * [Fuzzing for software vulnerability discovery](fuzz/fuzzing-for-software-vulnerability-discovery.md)
 * [Fuzzing 101](fuzz/fuzzing-101.md)
-
-***
-
-* [Vulnerability Discovery](vulnerability-discovery.md)
-
-## Rust
-
-* [Rust-1](rust/rust-1.md)
-* [Rust-2](rust/rust-2.md)

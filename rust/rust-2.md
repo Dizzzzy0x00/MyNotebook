@@ -1,6 +1,6 @@
 ---
 description: 书接上回
-cover: ../.gitbook/assets/微信图片_20240601094138.jpg
+cover: ../.gitbook/assets/01.jpg
 coverY: 0
 ---
 
@@ -97,7 +97,7 @@ let s2 = s1;
 
 这段代码执行以后，内存中的表现是这样的：
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 看这张图，**s1部分为灰色**，是因为在 `let s2 = s1;` 之后，Rust 认为 s1 不再有效
 
@@ -152,7 +152,7 @@ error: could not compile `playground` (bin "playground") due to previous error; 
 
 如果我们确实需要深度复制 `String` 中堆上的数据，而不仅仅是栈上的数据，可以使用一个叫做 `clone` 的通用函数，例如下面的示例代码
 
-```
+```rust
 let s1 = String::from("hello");
 let s2 = s1.clone();
 
@@ -161,7 +161,7 @@ println!("s1 = {}, s2 = {}", s1, s2);
 
 **只在栈上的数据：拷贝**
 
-```
+```rust
 let x = 5;
 let y = x;
 
@@ -341,3 +341,45 @@ fn main() {
 }
 
 ```
+
+#### **悬垂引用**
+
+"垂悬引用"（Dangling Reference）通常发生在一个引用或者指针指向一个已经被销毁或者移动的对象，或者数据被改动但引用没有得到更新的情况，这样就造成了这个指针或者引用"垂悬"——简单来说就是**指针指向的内存被分配给其它持有者，这个指针就是一个悬垂状态**
+
+下面的代码导致垂悬引用，无法通过编译：
+
+```rust
+fn main() {
+    let reference_to_nothing = dangle();
+}
+
+fn dangle() -> &String {
+    let s = String::from("hello");
+
+    &s
+}//此时s的生命周期已经结束，无法创建s的引用并进行返回
+//编译报错：
+$ cargo run
+   Compiling ownership v0.1.0 (file:///projects/ownership)
+error[E0106]: missing lifetime specifier
+
+  |
+5 | fn dangle() -> &String {
+  |                ^ expected named lifetime parameter
+  |
+  = help: this function's return type contains a borrowed value, but there is no value for it to be borrowed from
+help: consider using the `'static` lifetime, but this is uncommon unless you're returning a borrowed value from a `const` or a `static`
+  |
+5 | fn dangle() -> &'static String {
+  |                 +++++++
+help: instead, you are more likely to want to return an owned value
+  |
+5 - fn dangle() -> &String {
+5 + fn dangle() -> String {
+  |
+
+For more information about this error, try `rustc --explain E0106`.
+error: could not compile `ownership` (bin "ownership") due to 1 previous error
+
+```
+

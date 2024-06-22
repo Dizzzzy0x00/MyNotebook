@@ -67,6 +67,40 @@ afl-fuzz -m none -i $HOME/Desktop/fuzzing_xpdf/pdf_examples/ -o $HOME/Desktop/fu
 
 <figure><img src="../.gitbook/assets/648e84a11d9a8a6cf55d618c47765cf.png" alt=""><figcaption></figcaption></figure>
 
+### Crash分析
+
+因为在AFL进行模糊测试时开启了ASAN，所以复现时很方便，第一个crash复现如下，是一个栈溢出漏洞，根据栈回溯可以看到，由于一直循环的调用Parse::getObj----XRef::fetch----Object::dictLookup----Parser::makeStream这三个函数导致最后栈溢出，定位源码以后看到是由于程序员编写递归时没有设置好递归深度上限，而样本导致了无限的递归。
+
+
+
+<figure><img src="../.gitbook/assets/d6aae3c29a74dd16c9e8497c5cbf15f.png" alt=""><figcaption></figcaption></figure>
+
+#### GDB调试
+
+调试的思路就是找循环的最后一个函数，看是为什么会跳转会一开始的函数，先看看源码其实已经很明显了：
+
+<figure><img src="../.gitbook/assets/ddaea5e200f60edcff9fea548a63774.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/63fb8206fc29725e7e480d804eeabb3.png" alt=""><figcaption></figcaption></figure>
+
+在Parser::makeStream下断点
+
+```
+gdb --args ./install/bin/pdftotext ./out/default/crashes/crash1
+
+pwndbg> b Parser::makeStream    //下断点
+Breakpoint 1 at 0x6a5120: file Parser.cc, line 146.
+pwndbg> r    //运行
+pwndbg> bt //栈回溯
+pwndbg> b *Parser::getObj    //下断点
+Breakpoint 2 at 0x6a0a90: file Parser.cc, line 41.
+pwndbg>c
+```
+
+<figure><img src="../.gitbook/assets/d36b41a26a6a96065297e3e7dac08f7.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/332cc7d9270657061397681afade59b.png" alt=""><figcaption></figcaption></figure>
+
 ## Exercise 9 - 7-Zip
 
 {% embed url="https://github.com/antonio-morales/Fuzzing101/tree/main/Exercise%209" %}
