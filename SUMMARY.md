@@ -15,6 +15,7 @@
 * [Rust-1](rust/rust-1.md)
 * [Rust-2](rust/rust-2.md)
 * [Rust-3](rust/rust-3.md)
+* [Rust-4](rust/rust-4.md)
 
 ## Fuzz
 

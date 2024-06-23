@@ -53,7 +53,7 @@ println!("{{}}");
 
 ### 一个Rust Program示例
 
-```
+```bash
 $ cargo new guessing_game
 $ cd guessing_game
 ```
@@ -98,16 +98,16 @@ Rust标准库_prelude_可以参见这个文档：
 
 编译：
 
-```
+```bash
 $ cargo build
 $ cargo run
 ```
 
 ### 变量和可变性
 
-Rust 是强类型语言，但具有自动判断变量类型的能力，声明变量，需要使用 `let` 关键字：
+Rust 是强类型语言，但具有自动判断变量类型的能力，声明变量，需要使用 `let` 关键字，注意**在 Rust 语言中，变量在声明时必须同时被初始化**：
 
-```
+```rust
 let a = 123;
 ```
 
@@ -320,6 +320,11 @@ fn main() {
 
 ```
 
+| `for item in collection`      | `for item in IntoIterator::into_iter(collection)` | 转移所有权 |
+| ----------------------------- | ------------------------------------------------- | ----- |
+| `for item in &collection`     | `for item in collection.iter()`                   | 不可变借用 |
+| `for item in &mut collection` | `for item in collection.iter_mut()`               | 可变借用  |
+
 **循环标签**
 
 如果存在嵌套循环，**`break` 和 `continue` 应用于此时最内层的循环**。选择在一个循环上指定一个循环标签（loop label），然后将标签与 `break` 或 `continue` 一起使用，使这些关键字应用于已标记的循环而不是最内层的循环。
@@ -361,3 +366,4 @@ remaining = 10
 End count = 2
 
 ```
+

@@ -367,9 +367,9 @@ error: could not compile `enums` (bin "enums") due to 1 previous error
 
 ### match 控制流 <a href="#the-match-control-flow-construct" id="the-match-control-flow-construct"></a>
 
-Rust 有一个非常强大的控制流构造，称为`match`，允许**将一个值与一系列模式**进行比较，**然后根据匹配的模式执行代码**。模式可以由**文字值、变量名、通配符和许多其他内容**组成；[这里](https://doc.rust-lang.org/book/ch18-00-patterns.html)介绍了所有不同类型的模式及其作用。`match`的强大之处在于模式的表达能力以及编译器确认所有可能的情况都得到处理的事实。可以将`match`想象成一台硬币分拣机：
+Rust 有一个非常强大的控制流构造，称为`match`，允许**将一个值与一系列模式**进行比较，**然后根据匹配的模式执行代码**。模式可以由**文字值、变量名、通配符和许多其他内容**组成；[这里](https://doc.rust-lang.org/book/ch18-00-patterns.html)介绍了所有不同类型的模式及其作用。`match`的强大之处在于模式的表达能力以及编译器确认**所有可能的情况都得到处理**的事实。可以将`match`想象成一台硬币分拣机：
 
-```
+```rust
 enum Coin {
     Penny,
     Nickel,
@@ -391,3 +391,98 @@ fn value_in_cents(coin: Coin) -> u8 {
 
 fn main() {}
 ```
+
+**注意match的穷尽性（exhaustive）**，例如在示例中必须match完Coin的四种类型——Penny,Nickel,Dime,Quarter，否则无法通过编译，如果对其他的值采取默认操作可以使用通配符方式：
+
+```rust
+enum Vehicle {
+    Airplane,
+    Train,
+    Car,
+    Ship,
+}
+
+fn fare(vehicle: Vehicle) -> i32 {
+    match vehicle {
+        Vehicle::Airplane => 800,
+        Vehicle::Train => 100,
+        //第一个没有显式地处理 Vehicle 枚举中的其余情况的被认为通配分支
+        other => {
+            -1
+            //如果这样写Rust警告存在未使用的变量
+        }
+        //必须将通配分支放在最后，因为match是按顺序匹配的
+        //如果我们在通配分支后添加其他分支
+        //Rust 将会警告此后的分支永远不会被匹配到
+    }
+}
+
+fn fare2(vehicle: Vehicle) -> i32 {
+    match vehicle {
+        Vehicle::Airplane => 800,
+        Vehicle::Train => 100,
+        _ => {
+            //使用_通配符可以匹配任意值而不绑定到该值
+            //不会警告存在未使用的变量
+            -1
+        }
+        
+    }
+}
+```
+
+### [matches!宏](https://course.rs/basic/match-pattern/match-if-let.html#matches%E5%AE%8F) <a href="#matches-hong" id="matches-hong"></a>
+
+Rust 标准库中提供了一个非常实用的宏：`matches!`，它可以将一个表达式跟模式进行匹配，然后返回匹配的结果 `true` or `false`
+
+下面的示例代码使用match宏从动态数组中筛选类型是 `MyEnum::Foo` 的元素
+
+```
+enum MyEnum {
+    Foo,
+    Bar
+}
+
+fn main() {
+    let v = vec![MyEnum::Foo,MyEnum::Bar,MyEnum::Foo];
+    v.iter().filter(|x| matches!(x, MyEnum::Foo));
+}
+
+```
+
+### if let 控制流
+
+相较于match较为冗长的情况处理，if let控制流更为简洁，直接上两个对比代码：
+
+```rust
+fn main() {
+    let config_max = Some(3u8);
+    match config_max {
+        Some(max) => println!("The maximum is configured to be {max}"),
+        _ => (),
+        //match必须有_ => ()保证穷尽性 
+    }
+}
+
+fn main() {
+    let config_max = Some(3u8);
+    if let Some(max) = config_max {
+        println!("The maximum is configured to be {max}");
+    }
+}
+```
+
+在if let之后可以匹配else表达式
+
+```rust
+fn main() {
+    let coin = Coin::Penny;
+    let mut count = 0;
+    if let Coin::Quarter(state) = coin {
+        println!("State quarter from {state:?}!");
+    } else {
+        count += 1;
+    }
+}
+```
+
