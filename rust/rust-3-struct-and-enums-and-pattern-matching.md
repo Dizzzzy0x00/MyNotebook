@@ -1,10 +1,10 @@
 ---
-description: 书接上回，本篇有关Slice结构体、枚举和匹配控制流
+description: 书接上回，本篇有关Slice、结构体、枚举和匹配控制流
 cover: ../.gitbook/assets/01.jpg
 coverY: 0
 ---
 
-# Rust-3
+# Rust-3 Struct & Enums & Pattern Matching
 
 ### [Slice ](https://doc.rust-lang.org/book/ch04-03-slices.html#the-slice-type) 类型 <a href="#the-slice-type" id="the-slice-type"></a>
 

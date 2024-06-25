@@ -12,10 +12,12 @@
 
 ## Rust
 
-* [Rust-1](rust/rust-1.md)
-* [Rust-2](rust/rust-2.md)
-* [Rust-3](rust/rust-3.md)
-* [Rust-4](rust/rust-4.md)
+* [Rust-1 Rust基础语法](rust/rust1-rust-ji-chu-yu-fa.md)
+* [Rust-2 Ownership](rust/rust-2-ownership.md)
+* [Rust-3 Struct & Enums & Pattern Matching](rust/rust-3-struct-and-enums-and-pattern-matching.md)
+* [Rust-4 Packages & Crates & Modules](rust/rust-4-packages-and-crates-and-modules.md)
+* [Rust5 Generics & Trait](rust/rust5-generics-and-trait.md)
+* [Rust-6 Collection](rust/rust-6-collection.md)
 
 ## Fuzz
 
