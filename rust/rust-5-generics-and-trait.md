@@ -4,7 +4,7 @@ cover: ../.gitbook/assets/01.jpg
 coverY: 0
 ---
 
-# Rust5 Generics & Trait
+# Rust-5 Generics & Trait
 
 ## Generics 泛型
 
@@ -253,4 +253,207 @@ fn some_function<T, U>(t: &T, u: &U) -> i32
 
 再如 `Copy` 特征，它也有一套自动实现的默认代码，当标记到一个类型上时，可以让这个类型自动实现 `Copy` 特征，进而可以调用 `copy` 方法，进行自我复制。
 
-总之，`derive` 派生出来的是 Rust 默认给我们提供的特征，在开发过程中极大的简化了自己手动实现相应特征的需求，当然，如果你有特殊的需求，还可以自己手动重载该实现
+总之，`derive` 派生出来的是 Rust 默认给我们提供的特征，在开发过程中极大的简化了自己手动实现相应特征的需求，当然，如果你有特殊的需求，还可以自己手动重载该实现。
+
+下面是学习了键值对之后写的作业题，放这里拿来当个例子吧
+
+```rust
+use std::collections::HashMap;
+#[derive(Debug, PartialEq, Eq,Hash)]
+struct Viking {
+    name: String,
+    country: String,
+}
+
+impl Viking {
+    fn new(name: &str, country: &str) -> Viking {
+        Viking {
+            name: name.to_string(),
+            country: country.to_string(),
+        }
+    }
+}
+
+fn main() {
+    // 使用 HashMap 来存储 viking 的生命值
+    let vikings = HashMap::from([
+        (Viking::new("Einar", "Norway"), 25),
+        (Viking::new("Olaf", "Denmark"), 24),
+        (Viking::new("Harald", "Iceland"), 12),
+    ]);
+
+    // 使用 derive 的方式来打印 viking 的当前状态
+    for (viking, health) in &vikings {
+        println!("{:?} has {} hp", viking, health);
+    }
+}
+```
+
+在这个例子中，使用了 `#[derive(Debug, PartialEq, Eq, Hash)]` 来为 `Viking` 结构体自动实现了相应的特性。
+
+* `Debug`：使得 `Viking` 结构体可以通过 `{:?}` 进行格式化打印。
+* `PartialEq` 和 `Eq`：使得 `Viking` 结构体可以执行相等性比较。这就允许我们基于两个 `Viking` 结构体实例的 `name` 属性和 `country` 属性来判断这两个实例是否相等。
+* `Hash`：使 `Viking` 结构体具备被哈希的能力，这样我们就可以将 `Viking` 结构体实例用作 `HashMap` 的键。
+
+此外还有一些常见的derive派生：
+
+* `Clone` 和 `Copy`：用于让类型支持复制和直接拷贝。
+* `PartialOrd` 和 `Ord`：为类型实现（部分）顺序性测试。
+
+### 特征对象
+
+看示例代码，**特征对象**指向实现了 `Draw` 特征的类型的实例，也就是指向了 `Button` 或者 `SelectBox` 的实例，这种映射关系是存储在一张表中，可以在运行时通过特征对象找到具体调用的类型方法。
+
+**可以通过 `&` 引用或者 `Box<T>` 智能指针的方式来创建特征对象。**
+
+```rust
+trait Draw {
+    fn draw(&self) -> String;
+}
+
+impl Draw for u8 {
+    fn draw(&self) -> String {
+        format!("u8: {}", *self)
+    }
+}
+
+impl Draw for f64 {
+    fn draw(&self) -> String {
+        format!("f64: {}", *self)
+    }
+}
+
+// 若 T 实现了 Draw 特征
+// 则调用该函数时传入的 Box<T> 可以被隐式转换成函数参数签名中的 Box<dyn Draw>
+// Box<T>类似于一个引用，但是包裹的值会被强制分配在堆上
+fn draw1(x: Box<dyn Draw>) {
+    // 由于实现了 Deref 特征，Box 智能指针会自动解引用为它所包裹的值，然后调用该值对应的类型上定义的 `draw` 方法
+    x.draw();
+}
+
+fn draw2(x: &dyn Draw) {
+    x.draw();
+}
+
+```
+
+Rust 编译器需要知道一个函数的返回类型占用多少内存空间。由于特征的不同实现类型可能会占用不同的内存，因此通过 `impl Trait` 返回多个类型是不被允许的，但是我们可以返回一个 `dyn` 特征对象来解决问题。此外，也可以[在数组中使用特征对象](https://practice-zh.course.rs/generics-traits/trait-object.html#%E5%9C%A8%E6%95%B0%E7%BB%84%E4%B8%AD%E4%BD%BF%E7%94%A8%E7%89%B9%E5%BE%81%E5%AF%B9%E8%B1%A1)
+
+```rust
+trait Bird {
+    fn quack(&self) -> String;
+}
+
+struct Duck;
+impl Duck {
+    fn swim(&self) {
+        println!("Look, the duck is swimming")
+    }
+}
+struct Swan;
+impl Swan {
+    fn fly(&self) {
+        println!("Look, the duck.. oh sorry, the swan is flying")
+    }
+}
+
+impl Bird for Duck {
+    fn quack(&self) -> String{
+        "duck duck".to_string()
+    }
+}
+
+impl Bird for Swan {
+    fn quack(&self) -> String{
+        "swan swan".to_string()
+    }
+}
+
+fn main() {
+    // 填空
+    let duck = Duck{};
+    duck.swim();
+
+    let bird = hatch_a_bird(2);
+    // 变成鸟儿后，它忘记了如何游，因此以下代码会报错
+    // bird.swim();
+    // 但它依然可以叫唤
+    println!("{}", bird.quack());
+    assert_eq!(bird.quack(), "duck duck");
+
+    let bird = hatch_a_bird(1);
+    // 这只鸟儿忘了如何飞翔，因此以下代码会报错
+    // bird.fly();
+    // 但它也可以叫唤
+    assert_eq!(bird.quack(), "swan swan");
+    let birds: Vec<Box<dyn Bird>> = vec![
+        Box::new(Duck{}),
+        Box::new(Duck{}),
+        Box::new(Swan{})
+    ];
+
+    for bird in birds {
+        bird.quack();
+        // 当 duck 和 swan 变成 bird 后，它们都忘了如何翱翔于天际，只记得该怎么叫唤了。。
+        // 因此，以下代码会报错
+        // bird.fly();
+    }
+    println!("Success!")
+}  
+
+fn hatch_a_bird(birdd:i32) -> Box<dyn Bird>{
+    if birdd==1{
+        Box::new(Swan {})
+    }else {
+        Box::new(Duck {})
+    }
+    
+}
+```
+
+#### 特征对象的动态分发
+
+当使用特征对象时，Rust 必须使用动态分发。编译器无法知晓所有可能用于特征对象代码的类型，所以它也不知道应该调用哪个类型的哪个方法实现。为此，Rust 在运行时使用特征对象中的指针来知晓需要调用哪个方法。动态分发也阻止编译器有选择的内联方法代码，这会相应的禁用一些优化
+
+<figure><img src="../.gitbook/assets/image (80).png" alt=""><figcaption></figcaption></figure>
+
+不是所有特征都能拥有特征对象，只有对象安全的特征才行。当一个特征的所有方法都有如下属性时，它的对象才是安全的：
+
+* 方法的返回类型不能是 `Self`
+* 方法没有任何泛型参数
+
+### Rust的`self` 和 `Self`&#x20;
+
+在Rust中，`self` 和 `Self` 有着完全不同的用途：
+
+1. `self`：主要在关联函数（即方法）中使用，**用于表示实例本身的引用**。根据需要使用 `self`，`&self`，`&mut self` 或 `Box<Self>` 以表明实例的所有权，可以借用（引用）或者可变借用。例如：
+
+```rust
+struct User {
+    name: String
+}
+
+impl User {
+   fn print_name(&self) {
+      println!("{}", self.name);
+   }
+}
+```
+
+在上述代码中，`&self` 表示 `print_name` 函数借用了 `User` 实例，不会用完后释放实例。
+
+2. `Self`：在trait或impl块中使用，**表示实现该trait或者impl的类型本身**。它在写可以被多个类型实现的trait或者实现方法时十分可用。例如：
+
+```rust
+trait Animal {
+   fn create(name: String) -> Self;
+}
+
+impl Animal for User {
+    fn create(name: String) -> Self {     //这里的 Self 就是 User 类型
+       User {name}
+    }
+}
+```
+
+在上述代码中，`Self`在`trait Animal`中表示任何实现`Animal`的类型。在`impl Animal for User`中，`Self`就代表了`User`类型。

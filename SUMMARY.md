@@ -16,8 +16,8 @@
 * [Rust-2 Ownership](rust/rust-2-ownership.md)
 * [Rust-3 Struct & Enums & Pattern Matching](rust/rust-3-struct-and-enums-and-pattern-matching.md)
 * [Rust-4 Packages & Crates & Modules](rust/rust-4-packages-and-crates-and-modules.md)
-* [Rust5 Generics & Trait](rust/rust5-generics-and-trait.md)
-* [Rust-6 Collection](rust/rust-6-collection.md)
+* [Rust-5 Generics & Trait](rust/rust-5-generics-and-trait.md)
+* [Rust-6 Collection & Error Handling](rust/rust-6-collection-and-error-handling.md)
 
 ## Fuzz
 
