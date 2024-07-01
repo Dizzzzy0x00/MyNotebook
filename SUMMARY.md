@@ -30,3 +30,4 @@
 * [AI with Fuzzing](fuzz/ai-with-fuzzing.md)
 * [Fuzzing for software vulnerability discovery](fuzz/fuzzing-for-software-vulnerability-discovery.md)
 * [Fuzzing 101](fuzz/fuzzing-101.md)
+* [LibAFL-Learn](fuzz/libafl-learn.md)
