@@ -18,7 +18,7 @@ description: Glibc堆利用之house of系列
 
 第一次调用malloc时会从\_\_malloc\_hook中取出malloc\_hook\_ini函数指针并执行
 
-```
+```c
 static void *
 malloc_hook_ini (size_t sz, const void *caller)
 {
@@ -73,7 +73,7 @@ __libc_malloc(size_t bytes)
 
 总结一下运行流程：
 
-第一次调用 malloc 申请堆空间：首先会跟着 hook 指针进入 `malloc_hook_ini()` 函数里面进行对 ptmalloc 的初始化工作，并置空 hook，再调用 `ptmalloc_init()` 和 `__libc_malloc()`；
+第一次调用 malloc 申请堆空间：首先会跟着 hook 指针进入 `malloc_hook_ini()` 函数里面进行对 `ptmalloc` 的初始化工作，并置空 hook，再调用 `ptmalloc_init()` 和 `__libc_malloc()`；
 
 再次调用 malloc 申请堆空间：malloc() -> \_\_libc\_malloc() -> \_int\_malloc()
 
@@ -109,10 +109,11 @@ _int_malloc(mstate av, size_t bytes)
 	  //决定如何分配满足条件的 chunk，达到分配最小的 size 的同时符合对齐要求的目的
 	  
 	  /* 没有可用的arena，随机分配一块内存并返回 */
+	 //topchunk不满足用户要求，尝试使用sysmalloc来进行内存分配
 	  if (__glibc_unlikely(av == NULL)){
-	void* p = sysmalloc(nb, av);
-	if (p != NULL)
-	  alloc_perturb(p, bytes);
+		void* p = sysmalloc(nb, av);
+		if (p != NULL)
+	  	alloc_perturb(p, bytes);
 	        return p;
 	  }
 	  //先检查是否属于 fast bins 范围内，尝试分配链中的 chunk 出去
@@ -434,7 +435,82 @@ _int_malloc(mstate av, size_t bytes)
 
 </code></pre>
 
+注意在\_int\_malloc函数试图使用 top chunk，但 top chunk 也不能满足分配的要求时，会执行如下分支
 
+```cpp
+/*
+Otherwise, relay to handle system-dependent cases
+*/
+else {
+      void *p = sysmalloc(nb, av);
+      if (p != NULL && __builtin_expect (perturb_byte, 0))
+        alloc_perturb (p, bytes);
+      return p;
+}
+```
+
+此时 ptmalloc 已经不能满足用户申请堆内存的操作，需要执行 sysmalloc 来向系统申请更多的空间。 但是对于堆来说有 mmap 和 brk 两种分配方式，我们需要让堆以 brk 的形式拓展，之后原有的 top chunk 会被置于 unsorted bin 中。
+
+综上，我们要实现 brk 拓展 top chunk，但是要实现这个目的需要绕过一些 libc 中的 check。 首先，malloc 的尺寸不能大于mmp\_.mmap\_threshold
+
+```cpp
+if ((unsigned long)(nb) >= (unsigned long)(mp_.mmap_threshold) && (mp_.n_mmaps < mp_.n_mmaps_max))
+```
+
+如果所需分配的 chunk 大小大于 mmap 分配阈值，默认为 128K，并且当前进程使用 mmap() 分配的内存块小于设定的最大值，将使用 mmap() 系统调用直接向操作系统申请内存。\
+在 sysmalloc 函数中存在对 top chunk size 的 check，如下
+
+```cpp
+assert((old_top == initial_top(av) && old_size == 0) ||
+     ((unsigned long) (old_size) >= MINSIZE &&
+      prev_inuse(old_top) &&
+      ((unsigned long)old_end & pagemask) == 0));
+```
+
+这里检查了 top chunk 的合法性，如果第一次调用本函数，top chunk 可能没有初始化，所以可能 old\_size 为 0。 如果 top chunk 已经初始化了，那么 top chunk 的大小必须大于等于 MINSIZE，因为 top chunk 中包含了 fencepost，所以 top chunk 的大小必须要大于 MINSIZE。其次 top chunk 必须标识前一个 chunk 处于 inuse 状态，并且 top chunk 的结束地址必定是页对齐的。此外 top chunk 除去 fencepost 的大小必定要小于所需 chunk 的大小，否则在\_int\_malloc() 函数中会使用 top chunk 分割出 chunk。\
+我们总结一下伪造的 top chunk size 的要求
+
+1. 伪造的 size 必须要对齐到内存页
+2. size 要大于 MINSIZE(64位下的0x10)
+3. size 要小于之后申请的 chunk size + MINSIZE(0x10)
+4. size 的 prev inuse 位必须为 1 &#x20;
+
+
+
+### FSOP <a href="#id-44437975_fsop" id="id-44437975_fsop"></a>
+
+FSOP 是 File Stream Oriented Programming 的缩写，根据前面对 FILE 的介绍得知进程内所有的\_IO\_FILE 结构会使用\_chain 域相互连接形成一个链表，这个链表的头部由\_IO\_list\_all 维护。
+
+FSOP 的核心思想就是劫持\_IO\_list\_all 的值来伪造链表和其中的\_IO\_FILE 项，但是单纯的伪造只是构造了数据还需要某种方法进行触发。FSOP 选择的触发方法是调用\_IO\_flush\_all\_lockp，这个函数会刷新\_IO\_list\_all 链表中所有项的文件流，相当于对每个 FILE 调用 fflush，也对应着会调用\_IO\_FILE\_plus.vtable 中的\_IO\_overflow。
+
+```
+int
+_IO_flush_all_lockp (int do_lock)
+{
+  ...
+  fp = (_IO_FILE *) _IO_list_all;
+  while (fp != NULL)
+  {
+       ...
+       if (((fp->_mode <= 0 && fp->_IO_write_ptr > fp->_IO_write_base))
+               && _IO_OVERFLOW (fp, EOF) == EOF)
+           {
+               result = EOF;
+          }
+        ...
+  }
+}
+```
+
+<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+而\_IO\_flush\_all\_lockp 不需要攻击者手动调用，在一些情况下这个函数会被系统调用：
+
+1. 当 libc 执行 abort 流程时
+2. 当执行 exit 函数时
+3. 当执行流从 main 函数返回时
+
+综上，FSOP的大致利用思路就是首先构造一个虚假的IO\_FILE结构体，在其中修改值使得mod、write\_plt、write\_base等满足绕过条件，然后构造虚假vtable表来进行劫持，再修改其中将要调用函数的指针即可。 &#x20;
 
 ## house of spirit
 
@@ -456,7 +532,7 @@ _int_malloc(mstate av, size_t bytes)
 
 ## house of einherjar
 
-#### 影响范围 <a href="#shi-yong-fan-wei-1" id="shi-yong-fan-wei-1"></a>
+### 影响范围 <a href="#shi-yong-fan-wei-1" id="shi-yong-fan-wei-1"></a>
 
 * `2.23`—— 至今
 * 可分配大于处于 `unsortedbin` 的 `chunk`
@@ -476,3 +552,145 @@ _int_malloc(mstate av, size_t bytes)
 * 读写合并后的大 `chunk` 可以操作 `chunk B` 的内容，`chunk B` 的头
 
 可以理解为`unlink`攻击
+
+
+
+## house of orange <a href="#id-25-house-of-orange" id="id-25-house-of-orange"></a>
+
+### 漏洞成因
+
+堆溢出写
+
+### 影响范围
+
+* `2.23`——`2.26`
+* **没有 `free`**
+* 可以 `unsortedbin attack`
+* 在 `glibc-2.24` 后加入了 `vtable` 的 `check`，不能任意地址伪造 `vatble` 了，但是可以利用 `IO_str_jumps` 结构进行利用。
+* 在 `glibc-2.26` 后，`malloc_printerr` 不再刷新 `IO` 流了，所以该方法失效
+
+### 利用原理
+
+`house of orange` 可以说是开启了堆与 `IO` 组合利用的先河，是非常经典、漂亮、精彩的利用组合技。利用过程还要结合 `top_chunk` 的性质，利用过程如下：
+
+**stage1**
+
+* 申请 `chunk A`，假设此时的 `top_chunk` 的 `size` 为 `0xWXYZ`
+* 写 `A`，溢出修改 `top_chunk` 的 `size` 为 `0xXYZ`（需要满足页对齐的检测条件）
+* 申请一个大于 `0xXYZ` 大小的 `chunk`，此时 `top_chunk` 会进行 `grow`，并**将原来的 `old top_chunk` 释放进入 `unsortedbin`**
+
+**stage2**
+
+* 溢出写 `A`，修改处于 `unsortedbin` 中的 `old top_chunk`，修改其 `size` 为 `0x61`，其 `bk` 为 `&_IO_list_all-0x10`，同时伪造好 `IO_FILE` 结构
+* 申请非 `0x60` 大小的 `chunk` 的时候，首先触发 `unsortedbin attack`，将`_IO_list_all` 修改为 `main_arena+88`，然后 `unsortedbin chunk` 会进入到 `smallbin`，大小为 `0x60`；接着遍历 `unsortedbin` 的时候触发了 `malloc_printerr`，然后调用链为： `malloc_printerr -> libc_message -> abort -> _IO_flush_all_lockp`，调用到伪造的 `vtable` 里面的函数指针
+
+
+
+## 例题 houseoforange
+
+### 二进制分析
+
+首先是菜单，可以看到题目提供的几个功能
+
+<figure><img src="../.gitbook/assets/8467c250d7fd4904f2d57760f16a745.png" alt=""><figcaption></figcaption></figure>
+
+通过build还原一下house的结构体：
+
+<figure><img src="../.gitbook/assets/6143255d6d67f0ca697ed3448890ffe.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/81806a5cd30c1721543518d4d1640b8.jpg" alt=""><figcaption></figcaption></figure>
+
+这里虽然检查house数量最大为3，但是注意没有index索引访问house，指针house\_arry始终指向最新的house，也就是说我们在build之后可以通过upgrade来更新house，一共有四次创建的机会和三次修改的机会
+
+回顾使用house of orange进行攻击，第一步：
+
+* 申请 `chunk A`，假设此时的 `top_chunk` 的 `size` 为 `0xWXYZ`
+* 写 `A`，溢出修改 `top_chunk` 的 `size` 为 `0xXYZ`（需要满足页对齐的检测条件）
+* 申请一个大于 `0xXYZ` 大小的 `chunk`，此时 `top_chunk` 会进行 `grow`，并将原来的 `old top_chunk` 释放进入 `unsortedbin`
+
+所以我们的目标是申请一个house并写这个house的时候溢出修改top\_chunk的size位
+
+首先我们先尝试分配一个堆块并查看此时的top\_chunk size：
+
+<figure><img src="../.gitbook/assets/5fc881ed52444ac6f53e4f40bfbadd7.png" alt=""><figcaption></figcaption></figure>
+
+````python
+```python
+build(0x30,'chunk1')  
+#修改前内存布局：
+#0x561a9ca212b0	0x0000000000000000	0x0000000000000041	........A....... #0x41大小的chunk
+#0x561a9ca212c0	0x0000316b6e756863	0x0000000000000000	chunk1.......... #chunk1即name
+#0x561a9ca212d0	0x0000000000000000	0x0000000000000000	................ #name部分
+#0x561a9ca212e0	0x0000000000000000	0x0000000000000000	................ #name部分
+#0x561a9ca212f0	0x0000000000000000	0x0000000000000021	........!....... #0x21大小的chunk
+#0x561a9ca21300	0x0000001f00000010	0x0000000000000000	................ #内容部分
+#0x561a9ca21310	0x0000000000000000	0x0000000000020cf1	................ <-- Top chunk  
+```
+````
+
+在upgrade对name进行更新时存在溢出，我们通过upgrade修改name可以覆盖top\_chunk size位，但是按照分析修改这个位置有几个要求：
+
+```
+大于MINSIZE(0X10)
+小于所需的大小 + MINSIZE
+prev inuse位设置为1
+old_top + oldsize的值是页对齐的
+```
+
+需要页对齐所以选择topchunk的末三位cf1是一个合理的选择
+
+接下来我们就修改这个top chunk，payload构造如下：
+
+````python
+```python
+payload = b'a'*0x30 +p64(0) + p64(0x21) + b'b'*0x10 + p64(0) + p64(0xcf1)
+print(payload)
+upgrade(len(payload),payload)
+#gdb.attach(p)
+#pause()
+#修改后内存布局：
+#0x562f7e5902b0	0x0000000000000000	0x0000000000000041	........A....... #0x41大小的chunk
+#0x562f7e5902c0	0x6161616161616161	0x6161616161616161	aaaaaaaaaaaaaaaa #b'a'*0x30
+#0x562f7e5902d0	0x6161616161616161	0x6161616161616161	aaaaaaaaaaaaaaaa #b'a'*0x30
+#0x562f7e5902e0	0x6161616161616161	0x6161616161616161	aaaaaaaaaaaaaaaa #b'a'*0x30
+#0x562f7e5902f0	0x0000000000000000	0x0000000000000021	........!....... #p64(0) + p64(0x21)
+#0x562f7e590300	0x0000001f00000010	0x6262626262626262	........bbbbbbbb #b'b'*0x10
+#0x562f7e590310	0x0000000000000000	0x0000000000000cf1	................ # <-- Top chunk #p64(0) + p64(0xcf1)
+```
+````
+
+<figure><img src="../.gitbook/assets/dc01fe798cbfade540f11c8e4882c54 (1).png" alt=""><figcaption></figcaption></figure>
+
+然后第二步就是说我们让那个topchunk挂到unsorted bin中，那么我们就需要再次申请一个chunk，大小要大于刚刚的top chunk。但是要注意不能大于malloc的分配阈值，也就是mp\_.mmap\_threshold，否则的话会去调用mmap申请空间，会申请在libc上面。成功将unsorted bin就相当于实现了一次free，这也就是houseoforange中针对没有free函数实现的绕过
+
+<figure><img src="../.gitbook/assets/9d326465f847802a4432d4a85b16609.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>unsorted bin链表回顾</p></figcaption></figure>
+
+接下来进行libc版本泄露：
+
+因为house of orange第二步要进行FSOP攻击劫持控制流，这首先需要攻击者获知 libc.so 基址，因为\_IO\_list\_all 是作为全局变量储存在 libc.so 中的，不泄漏 libc 基址就不能改写\_IO\_list\_all，也无法得知system函数等地址
+
+泄露libc需要进行unsorted bin攻击：unsortedbin使用双向循环链表，在该链表中必有一个节点（循环链表实际上没有头尾，不准确的说是尾节点）的 `fd` 指针会指向 `main_arena` 结构体内部，将一个 `chunk` 放入 `Unsorted Bin` 中后再打出其 `fd`，对处于链表尾的节点 `show` 就可以获得 `libc` 的基地址了。而`Unsorted Bin` 里面只存在一个 `bin` （就是我们之前放入的top chunk）的时候，该 `bin` 的 `fd` 和 `bk` 都会指向 `main_arena` 中。我们申请一块堆，这块堆会从unsorted bin（之前的top chunk中）进行切割：
+
+<figure><img src="../.gitbook/assets/4fe7f72fbea23cd2f1c7883075cb3ac.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/02ec278f436c52f3df7472d993c3211.png" alt=""><figcaption></figcaption></figure>
+
+可以看到再我们申请到的这个从unsortedbin中切割的大小为400的块的name字段中，前八位是填充的61，后面8位是指向地址（0x7F6D009CC1E0）这就是我们需要leak的`fd` 指针（指向 `main_arena` 中的一个位置），fd与main\_arena有一个**固定偏移（因不同的 `glibc` 版本而异）**，在调试中我们知道main\_arena地址：0x7F6D009CBBE0，计算`offst = 0xC1E0-0xBBE0=0x600`
+
+```
+```
+
+
+
+
+
+## 例题 bufoverflow\_a
+
+
+
+
+
+
+
