@@ -502,7 +502,7 @@ _IO_flush_all_lockp (int do_lock)
 }
 ```
 
-<figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 而\_IO\_flush\_all\_lockp 不需要攻击者手动调用，在一些情况下这个函数会被系统调用：
 
@@ -665,7 +665,7 @@ upgrade(len(payload),payload)
 
 <figure><img src="../.gitbook/assets/9d326465f847802a4432d4a85b16609.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (1).png" alt=""><figcaption><p>unsorted bin链表回顾</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>unsorted bin链表回顾</p></figcaption></figure>
 
 接下来进行libc版本泄露：
 

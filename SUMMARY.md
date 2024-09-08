@@ -4,6 +4,7 @@
 * [🤠 Cyber attack and defense Notebook](cyber-attack-and-defense-notebook.md)
 * [Pwn Notebook](pwn-notebook/README.md)
   * [House of](pwn-notebook/house-of.md)
+* [AI-Attack](ai-attack.md)
 * [CTF Encode Summary](ctf-encode-summary.md)
 * [Assembly Language Notebook](assembly-language-notebook.md)
 * [Pytorch Notebook](pytorch-notebook.md)
