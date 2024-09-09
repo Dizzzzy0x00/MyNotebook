@@ -23,7 +23,7 @@
       * 拼写错误检测和语义错误检测——>拼写错误纠正（后验概率，贝叶斯优化应用）
       * 文本顺序检测
       * 应用Unicode标准化（NFKD和/NFKC）
-      * 应用OCR（光学字符识别），以避免不可见字符和同形符号的问题，因为OCR模型将以与人类相同的方式“看到”文本。 [**Bad Characters: Imperceptible NLP Attacks**](#user-content-fn-1)[^1]
+      * 应用OCR（光学字符识别），以避免不可见字符和同形符号的问题，因为OCR模型将以与人类相同的方式“看到”文本。 [**Bad Characters: Imperceptible NLP Attacks**](#user-content-fn-1)[^1][**https://zhuanlan.zhihu.com/p/675827506**](https://zhuanlan.zhihu.com/p/675827506)
       * 使用聚类方法将视觉上相似的Unicode字符组合在一起
 
       <figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
