@@ -4,7 +4,6 @@
 * [🤠 Cyber attack and defense Notebook](cyber-attack-and-defense-notebook.md)
 * [Pwn Notebook](pwn-notebook/README.md)
   * [House of](pwn-notebook/house-of.md)
-* [AI-Attack](ai-attack.md)
 * [CTF Encode Summary](ctf-encode-summary.md)
 * [Assembly Language Notebook](assembly-language-notebook.md)
 * [Pytorch Notebook](pytorch-notebook.md)
@@ -34,3 +33,8 @@
 * [Fuzzing for software vulnerability discovery](fuzz/fuzzing-for-software-vulnerability-discovery.md)
 * [Fuzzing 101](fuzz/fuzzing-101.md)
 * [LibAFL-Learn](fuzz/libafl-learn.md)
+
+## AI-Attack
+
+* [AI-Attack-NLP Attacks](ai-attack/ai-attack-nlp-attacks.md)
+* [AI-Attack-LLM Attacks](ai-attack/ai-attack-llm-attacks.md)

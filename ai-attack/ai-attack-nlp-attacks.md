@@ -1,10 +1,12 @@
-# AI-Attack
+---
+cover: >-
+  https://images.unsplash.com/photo-1712510795837-683b93b2b95e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxOTcwMjR8MHwxfHJhbmRvbXx8fHx8fHx8fDE3MjYwMjM5NTl8&ixlib=rb-4.0.3&q=85
+coverY: 0
+---
 
+# AI-Attack-NLP Attacks
 
-
-## NLP Attack
-
-### part 0 Start
+## Part0 Start
 
 一篇很好的入门文章，开启NLP attack的学习之路：
 
@@ -26,7 +28,7 @@
       * 应用OCR（光学字符识别），以避免不可见字符和同形符号的问题，因为OCR模型将以与人类相同的方式“看到”文本。 [**Bad Characters: Imperceptible NLP Attacks**](#user-content-fn-1)[^1][**https://zhuanlan.zhihu.com/p/675827506**](https://zhuanlan.zhihu.com/p/675827506)
       * 使用聚类方法将视觉上相似的Unicode字符组合在一起
 
-      <figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+      <figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 *   **Adversarial NLP Attacks** 对抗性NLP攻击
 
     * **“text containing **_**“**_[_**perturbations**_](#user-content-fn-2)[^2]_**”**_** to fool a machine learning model”**
@@ -43,9 +45,11 @@
 
 
 
-    <figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption><p>Example of an adversarial NLP Attack [2]</p></figcaption></figure>
+    <figure><img src="../.gitbook/assets/image (1) (1).png" alt=""><figcaption><p>Example of an adversarial NLP Attack [2]</p></figcaption></figure>
 
 
+
+## Part1 使用openattack实现一次NLP attack
 
 [^1]: **Bad Characters: Imperceptible NLP Attacks,** Nicholas Boucher et al. [https://arxiv.org/abs/2106.09898](https://arxiv.org/abs/2106.09898) (2021)
 
