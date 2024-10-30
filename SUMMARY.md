@@ -11,6 +11,10 @@
 * [Software Security](software-security.md)
 * [Vulnerability Discovery](vulnerability-discovery.md)
 
+## BCSD
+
+* [BCSD0-START](bcsd/bcsd0-start.md)
+
 ## Rust
 
 * [Rust-1 Rust基础语法](rust/rust1-rust-ji-chu-yu-fa.md)
@@ -38,3 +42,4 @@
 
 * [AI-Attack-NLP Attacks](ai-attack/ai-attack-nlp-attacks.md)
 * [AI-Attack-LLM Attacks](ai-attack/ai-attack-llm-attacks.md)
+* [AI-Attack-CV Attacks](ai-attack/ai-attack-cv-attacks.md)

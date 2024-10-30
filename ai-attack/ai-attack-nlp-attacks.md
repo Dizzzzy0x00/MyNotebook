@@ -1,7 +1,7 @@
 ---
 cover: >-
-  https://images.unsplash.com/photo-1712510795837-683b93b2b95e?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxOTcwMjR8MHwxfHJhbmRvbXx8fHx8fHx8fDE3MjYwMjM5NTl8&ixlib=rb-4.0.3&q=85
-coverY: 0
+  https://images.unsplash.com/photo-1726758004499-b4ea21408bcf?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxOTcwMjR8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Mjg0NDQ1MjN8&ixlib=rb-4.0.3&q=85
+coverY: -140
 ---
 
 # AI-Attack-NLP Attacks

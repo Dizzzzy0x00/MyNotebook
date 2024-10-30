@@ -12,12 +12,12 @@ coverY: 75.38567730802416
 
 **插桩部分**
 
-1. 普通插桩，针对源码的插桩：afl-gcc.c, afl-as.c, afl-as.h。可用编译器有 clang 和 gcc。
+1. 普通插桩，针对源码的插桩：[afl-gcc.c](afl-source-code-reading.md#afl-gcc.c), [afl-as.c](afl-source-code-reading.md#afl-as.c), [afl-as.h](afl-source-code-reading.md#afl-as.h)。可用编译器有 clang 和 gcc。
 2. llvm插桩，针对源码的插桩
 
 **fuzzer 模块**
 
-1. afl-fuzz.c：实现 fuzzer 的核心代码，是 AFL 的主体
+1. [afl-fuzz.c](afl-source-code-reading.md#afl-fuzz.c)：实现 fuzzer 的核心代码，是 AFL 的主体
 
 ## 汇编知识回顾
 

@@ -1,3 +1,9 @@
+---
+cover: >-
+  https://images.unsplash.com/photo-1727029223470-ff234a7394f3?crop=entropy&cs=srgb&fm=jpg&ixid=M3wxOTcwMjR8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Mjg0NDQ0Nzh8&ixlib=rb-4.0.3&q=85
+coverY: 0
+---
+
 # AI-Attack-LLM Attacks
 
 综述：[《Survey of Vulnerabilities in Large Language Models Revealed by Adversarial Attacks 》](https://arxiv.org/abs/2310.10844)
