@@ -1,30 +1,26 @@
 # Table of contents
 
-* [😅 Cybersecurity Technology Notebook](README.md)
-* [🤠 Cyber attack and defense Notebook](cyber-attack-and-defense-notebook.md)
+## course
+
+* [Deep Learning with Graphs](README.md)
+* [😅 Cybersecurity Technology Notebook](course/cybersecurity-technology-notebook.md)
+* [🤠 Cyber attack and defense Notebook](course/cyber-attack-and-defense-notebook.md)
+* [Assembly Language Notebook](course/assembly-language-notebook.md)
+* [Pytorch Notebook](course/pytorch-notebook.md)
+* [NISP二级\&hvv](course/nisp-er-ji-hvv.md)
+* [Software Security](course/software-security.md)
+
+***
+
 * [Pwn Notebook](pwn-notebook/README.md)
   * [House of](pwn-notebook/house-of.md)
+  * [Vulnerability Discovery](pwn-notebook/vulnerability-discovery.md)
 * [CTF Encode Summary](ctf-encode-summary.md)
-* [Assembly Language Notebook](assembly-language-notebook.md)
-* [Pytorch Notebook](pytorch-notebook.md)
-* [NISP二级\&hvv](nisp-er-ji-hvv.md)
-* [Software Security](software-security.md)
-* [Vulnerability Discovery](vulnerability-discovery.md)
 
 ## BCSD
 
 * [BCSD0-START](bcsd/bcsd0-start.md)
 * [BCSD1-Algorithm1——CFG](bcsd/bcsd1-algorithm1-cfg.md)
-
-## Rust
-
-* [Rust-1 Rust基础语法](rust/rust1-rust-ji-chu-yu-fa.md)
-* [Rust-2 Ownership](rust/rust-2-ownership.md)
-* [Rust-3 Struct & Enums & Pattern Matching](rust/rust-3-struct-and-enums-and-pattern-matching.md)
-* [Rust-4 Packages & Crates & Modules](rust/rust-4-packages-and-crates-and-modules.md)
-* [Rust-5 Generics & Trait](rust/rust-5-generics-and-trait.md)
-* [Rust-6 Collection & Error Handling](rust/rust-6-collection-and-error-handling.md)
-* [Rust-7 Closure](rust/rust-7-closure.md)
 
 ## Fuzz
 
@@ -44,3 +40,13 @@
 * [AI-Attack-NLP Attacks](ai-attack/ai-attack-nlp-attacks.md)
 * [AI-Attack-LLM Attacks](ai-attack/ai-attack-llm-attacks.md)
 * [AI-Attack-CV Attacks](ai-attack/ai-attack-cv-attacks.md)
+
+## Rust
+
+* [Rust-1 Rust基础语法](rust/rust1-rust-ji-chu-yu-fa.md)
+* [Rust-2 Ownership](rust/rust-2-ownership.md)
+* [Rust-3 Struct & Enums & Pattern Matching](rust/rust-3-struct-and-enums-and-pattern-matching.md)
+* [Rust-4 Packages & Crates & Modules](rust/rust-4-packages-and-crates-and-modules.md)
+* [Rust-5 Generics & Trait](rust/rust-5-generics-and-trait.md)
+* [Rust-6 Collection & Error Handling](rust/rust-6-collection-and-error-handling.md)
+* [Rust-7 Closure](rust/rust-7-closure.md)

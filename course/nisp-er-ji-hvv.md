@@ -1,5 +1,5 @@
 ---
-cover: .gitbook/assets/微信图片_20231017145800.jpg
+cover: ../.gitbook/assets/微信图片_20231017145800.jpg
 coverY: 108.20338983050848
 ---
 
@@ -32,7 +32,7 @@ PDCA（**plan-do-check-act 或者 plan-do-check-adjust**）循环的 4 个阶段
 
 ISO27001信息安全管理体系包含的14个控制域（**没有业务安全性审计**）
 
-<figure><img src=".gitbook/assets/image (50).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (50).png" alt=""><figcaption></figcaption></figure>
 
 信息系统安全保障模型包含：**保障要素，生命周期和安全特征**三个方面
 
@@ -42,7 +42,7 @@ ISO27001信息安全管理体系包含的14个控制域（**没有业务安全�
 
 信息安全风险管理的内容和过程：
 
-<figure><img src=".gitbook/assets/image (54).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (54).png" alt=""><figcaption></figcaption></figure>
 
 Kerberos 基本认证过程分为三个阶段：第一阶段：获得票据许可票据； 第二阶段：获得服务许可票据；第三阶段：获得服务。
 
@@ -183,7 +183,7 @@ TCP/IP **4层协议模型**自上而下分别是：**应用层、传输层、互
 
 全国网安事件
 
-<figure><img src=".gitbook/assets/image (47).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (47).png" alt=""><figcaption></figcaption></figure>
 
 * 代号夜龙
 * 震网
@@ -191,11 +191,11 @@ TCP/IP **4层协议模型**自上而下分别是：**应用层、传输层、互
   * 利用漏洞：MS10-046/西门子SIMATIC WinCC系统 0 day漏洞
   *   渗透手段： U盘
 
-      <figure><img src=".gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
+      <figure><img src="../.gitbook/assets/image (48).png" alt=""><figcaption></figcaption></figure>
 * 海莲花事件
   *   鱼叉攻击
 
-      <figure><img src=".gitbook/assets/image (49).png" alt=""><figcaption></figcaption></figure>
+      <figure><img src="../.gitbook/assets/image (49).png" alt=""><figcaption></figcaption></figure>
 * 乌克兰火电站事件
   * 钓鱼邮件感染办公电脑，导致内网被渗透，发生大面积停电
   * 俄罗斯对乌克兰的攻击
@@ -268,7 +268,7 @@ select @@basedir;#mysql安装路径
 
 例如user-Agent注入用payload进行渗透：`updatexml(xml_document,xpath_string,new_value)`,`xpath_string`设置为需要打印的报错信息
 
-<figure><img src=".gitbook/assets/image (32).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (32).png" alt=""><figcaption></figcaption></figure>
 
 #### Cookie注入
 
@@ -294,7 +294,7 @@ php中的宽字节
 
 #### 二阶注入
 
-<figure><img src=".gitbook/assets/image (31).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (31).png" alt=""><figcaption></figcaption></figure>
 
 将已经存储的用户输入被读取后再次进入到SQL查询中导致的注入，攻击者先向数据库中插入恶意语句（即使后端代码对语句进行了转义），然后再引用恶意数据
 

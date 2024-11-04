@@ -71,7 +71,7 @@ $$
 f(x) = \frac{1}{1+e^{-x}}
 $$
 
-<figure><img src=".gitbook/assets/image (40).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (40).png" alt=""><figcaption></figcaption></figure>
 
 激活函数的选择：
 
@@ -95,7 +95,7 @@ $$
 * 多输出神经元——>softmax——>多分类逻辑斯蒂回归模型
 *
 
-    <figure><img src=".gitbook/assets/image (41).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../.gitbook/assets/image (41).png" alt=""><figcaption></figcaption></figure>
 
 #### 梯度下降算法的优化方法
 
@@ -575,12 +575,12 @@ joblib.dump(t, tokenizer_path)
   * 给定一段用于训练的文本语料, 再选定某段长度(窗口)作为研究对象, **使用上下文词汇预测目标词汇**
   *
 
-      <figure><img src=".gitbook/assets/image (43).png" alt=""><figcaption></figcaption></figure>
+      <figure><img src="../.gitbook/assets/image (43).png" alt=""><figcaption></figcaption></figure>
 * skipgram模式
   * 给定一段用于训练的文本语料, 再选定某段长度(窗口)作为研究对象, **使用目标词汇预测上下文词汇**
   *
 
-      <figure><img src=".gitbook/assets/image (44).png" alt=""><figcaption></figcaption></figure>
+      <figure><img src="../.gitbook/assets/image (44).png" alt=""><figcaption></figcaption></figure>
 
 #### 使用fasttext工具实现word2vec的训练和使用
 
@@ -614,7 +614,7 @@ CRF：条件随机场
 
 RNN：循环神经网络，RNN的循环机制使模型隐层**上一时间步产生的结果能够作为当下时间步输入的一部分**(即当下时间步的输入除了正常的输入外还包括上一步的隐层输出)，对当下时间步的输出产生影响
 
-<figure><img src=".gitbook/assets/RNN2.gif" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/RNN2.gif" alt=""><figcaption></figcaption></figure>
 
 从两个角度对RNN模型进行分类. 第一个角度是输入和输出的结构, 第二个角度是RNN的内部构造
 
@@ -631,7 +631,7 @@ RNN：循环神经网络，RNN的循环机制使模型隐层**上一时间步产
     * seq2seq架构最早被提出应用于机器翻译, 因为其输入输出不受限制，如今也是应用最广的RNN模型结构. 在机器翻译, 阅读理解, 文本摘要等众多领域都进行了非常多的应用实践
     *
 
-        <figure><img src=".gitbook/assets/image (37).png" alt=""><figcaption></figcaption></figure>
+        <figure><img src="../.gitbook/assets/image (37).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -684,7 +684,7 @@ output , hn = rnn(input,h0)
 * 输出门
   * 包含两个部分：（1）计算输出门的门值，和遗忘门/输入门的计算方式相同$$σ_t = σ(W_σ*[h_t-1,x_t]+b_σ)$$，（2）计算这个门值产生的隐含状态$$h_t = σ_t * tanh(C_t)$$，
 
-<figure><img src=".gitbook/assets/image (36).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (36).png" alt=""><figcaption></figcaption></figure>
 
 #### LSTM代码实战
 
@@ -724,7 +724,7 @@ GRU（Gated Recurrent Unit），门控循环单元结构，同LSTM能够有效�
 * 重置门
 *
 
-    <figure><img src=".gitbook/assets/image (45).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../.gitbook/assets/image (45).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -746,7 +746,7 @@ nn.GRU类实例化对象主要参数解释:
 
 n个结构完全相同的Encoders + n个完全相同的Decoders
 
-<figure><img src=".gitbook/assets/image (38).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (38).png" alt=""><figcaption></figcaption></figure>
 
 Encoder分为三个部分：
 
@@ -756,7 +756,7 @@ Encoder分为三个部分：
 
     位置编码
 
-    <figure><img src=".gitbook/assets/image (39).png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../.gitbook/assets/image (39).png" alt=""><figcaption></figcaption></figure>
 2. 多头注意力机制
 3. 前馈神经网络
 

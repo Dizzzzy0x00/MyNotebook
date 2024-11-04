@@ -1,6 +1,6 @@
 ---
 description: assemble language 汇编语言程序设计
-cover: .gitbook/assets/微信图片_20230910173724.png
+cover: ../.gitbook/assets/微信图片_20230910173724.png
 coverY: -22
 ---
 

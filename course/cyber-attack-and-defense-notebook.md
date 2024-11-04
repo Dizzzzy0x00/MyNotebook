@@ -1,5 +1,5 @@
 ---
-cover: .gitbook/assets/106047122_p0.jpg
+cover: ../.gitbook/assets/106047122_p0.jpg
 coverY: 164
 ---
 
@@ -137,7 +137,7 @@ def baidu_search():
 
 #### **网络扫描的类型和原理**
 
-<figure><img src=".gitbook/assets/1.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/1.png" alt=""><figcaption></figcaption></figure>
 
 * 主机扫描
   *   **传统 ICMP Ping 扫描**
@@ -165,12 +165,12 @@ def baidu_search():
 
       调用 connect() socket 函数连接目标端口，无需特权用户权限可发起，目标主机记录大量连接和错误信息，容易检测。 开放端口：完成完整的TCP三次握手(SYN, SYN|ACK, ACK)，timeout/RST 关闭端口：SYN，RST
 
-      ![](.gitbook/assets/2.png)
+      ![](../.gitbook/assets/2.png)
   *   **SYN扫描**
 
       半开扫描(half-open scanning)，目标主机不会记录未建立连接，较为隐蔽，需根用户权限构建定制SYN包。 开放端口：攻击者SYN，目标主机SYN|ACK，攻击者立即反馈RST包关闭连接。 关闭端口：攻击者SYN，目标主机RST。
 
-      ![](.gitbook/assets/3.png)
+      ![](../.gitbook/assets/3.png)
   *   隐蔽端口扫描
 
       TCP 连接扫描和 SYN 扫描并不隐蔽，防火墙会监控发往受限端口的 SYN 包，隐蔽端口扫描通过构造特殊的 TCP 标志位，以躲避检测，同时达成端口扫描目的。
@@ -198,7 +198,7 @@ def baidu_search():
 
       对目标端口发送特殊定制的 UDP 数据报文。 开放端口：UDP 反馈 关闭端口：ICMP port unreachable 报文。
 
-      ![](.gitbook/assets/4.png)
+      ![](../.gitbook/assets/4.png)
 *   系统类型扫描
 
     利用Banner（服务程序接收到客户端的正常连接后所给出的欢迎信息）
@@ -512,7 +512,7 @@ def window_scan(ip, port):
 
 
 
-    <figure><img src=".gitbook/assets/5.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../.gitbook/assets/5.png" alt=""><figcaption></figcaption></figure>
 * **漏洞利用内存变化**
 *   **压栈、出栈栈溢出原理**
 
@@ -967,7 +967,7 @@ extern char ** environ;
 
 Web应用基本原理的三个核心：Web客户端、Web服务器和HTTP协议
 
-<figure><img src=".gitbook/assets/6.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/6.png" alt=""><figcaption></figcaption></figure>
 
 URL统一资源定位符：
 
