@@ -1,4 +1,4 @@
-# Deep Learning with Graphs
+# 🐒 Deep Learning with Graphs
 
 ## Part1 Graphs
 
@@ -32,14 +32,14 @@
   * eg: T=2时 两种类型的节点 二分图，可以进行展开拆分成U图和V图
   *
 
-      <figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+      <figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
 
 图的重要特征
 
 * Node Degrees 节点度
   *   应用：侧面反应网络中枢节点
 
-      <figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+      <figure><img src=".gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 
 * Adjacency Matrix 邻接矩阵（图的矩阵表示）
@@ -50,6 +50,39 @@
     * 针对这个问题引入：连接列表和邻接列表，只记录连接关系
     *
 
-        <figure><img src=".gitbook/assets/image (2).png" alt=""><figcaption></figcaption></figure>
+        <figure><img src=".gitbook/assets/image (2) (1).png" alt=""><figcaption></figcaption></figure>
 
 图的表示学习：自动学习特征，将各个模态的输入转为向量，将节点映射为d维向量（低维 连续 稠密—— distributed vector 分布式向量、task-independent 与下游任务无关）
+
+节点嵌入的目的：向量点乘数值（余弦相似度）反应节点的相似度
+
+
+
+## DeepWalk
+
+原文：DeepWalk: Online Learning of Social Representations
+
+{% embed url="https://dl.acm.org/doi/10.1145/2623330.2623732" %}
+
+论文Keyword：Online learning增量学习，实现对图中节点的Embedding Learning 表示学习，输入为图，输出为每个节点对应的k维向量
+
+### 方法 Algorithm：DEEPWALK
+
+* **“Random walk generator” 随机游走生成器**
+* **“Update procedure” 迭代优化**
+
+<figure><img src=".gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src=".gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+
+语言模型推广：中心词预测周围词，通过随机游走路径来进行语言建模——用前i-1个节点预测第i个节点 $$Pr(v_i | (\Phi(v_1),\Phi(v_2),...,\Phi(v_{i-1}))),这里\Phi(v_k)表示节点k的嵌入向量$$,但是在节点数量很多时引入连乘的条件概率会导致太小而不可行，所以更改为优化损失：
+
+$$
+minimize -log Pr(\frac{v_{i-w},...,v_{i+w}}{v_i} | \Phi(v_i))
+$$
+
+重点：
+
+* 损失函数的计算 $$J(\Phi) = -logPr(u_k|\Phi(v_j))$$$$= \prod_{j=i-w,j=i}^{i+w}Pr(v_j|\Phi(v_i))$$
+
+### 代码实战——味鸡百科词条DeepWalk图嵌入weiji

@@ -2,7 +2,7 @@
 description: 网络空间安全技术总结
 ---
 
-# 😅 Cybersecurity Technology Notebook
+# Cybersecurity Technology Notebook
 
 ### 缩写整理
 

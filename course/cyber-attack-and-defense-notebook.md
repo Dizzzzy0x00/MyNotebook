@@ -3,7 +3,7 @@ cover: ../.gitbook/assets/106047122_p0.jpg
 coverY: 164
 ---
 
-# 🤠 Cyber attack and defense Notebook
+# Cyber attack and defense Notebook
 
 ### CH1 网络攻击技术
 
