@@ -102,3 +102,27 @@ fun:
     jr      $ra         ; 返回调用者
     nop                 ; 空操作，确保流水线正确性
 ```
+
+
+
+## Part2-A Survey
+
+
+
+### OVERVIEW
+
+二进制代码编译流程：
+
+source code-----> compiler and optimization -----> linker ------> excutable or library
+
+<figure><img src="../.gitbook/assets/image (83).png" alt=""><figcaption></figcaption></figure>
+
+BCSD方法的三个特征
+
+* 比较的类型：相同、相似、等效 “ identical, similar, equivalent ”
+  * identical：they have the same syntax, i.e., the same representation
+  * equivalent：have the same semantics, i.e., if they offer exactly the same functionality（mov %eax,$0 and xor %eax,%eax）
+  * similar：their syntax, structure, or semantics are similar
+* 被比较的二进制代码的粒度（granularity）：指令、基本块、函数  “instructions, basic blocks, functions”
+* 正在比较的输入块的数量：一对一、一对多、多对多
+*
