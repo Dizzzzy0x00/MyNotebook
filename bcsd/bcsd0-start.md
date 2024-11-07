@@ -107,6 +107,53 @@ fun:
 
 ## Part2-A Survey
 
+{% embed url="https://dl.acm.org/doi/10.1145/3446371" %}
+
+> 对比了2019年及之前的BCSD工作（61种方法），筛选方法时：
+>
+> * 排除了需要访问源代码的方法
+> * 排除了对字节码进行操作的方法
+> * 我们排除了通过系统调用或OS API调用，仅在程序与其环境的交互上比较相似性的行为方法。&#x20;
+> * 排除了将二进制代码视为没有结构的原始字节序列的方法，如文件哈希、模糊哈希和基于签名的方法。需要考虑将原始字节分解为指令的方法。
+>
+> 关注的方法特征如下：
+>
+> * Input Comparison：一对一（OO）、一对多（OM）或多对多（MM）
+> * Approach Comparison ：相似的（S）、相同的（I）或等效的（E）
+> * Input Granularity ：指令（I）、基本块（B）、函数（F）或程序（P）
+> * Approach Granularities&#x20;
+> * Syntactical similarity&#x20;
+> * Semantic similarity&#x20;
+> * Structural similarity ：CFG（C）、ICFG（I）、CALLGRAPH（G）和其他自定义图（O）
+> * Feature-based&#x20;
+> * Machine learning：有监督的（S）或无监督的（U）
+> * Locality sensitive hashing&#x20;
+> * Cross-architecture&#x20;
+> * Static analysis&#x20;
+> * Dynamic analysis&#x20;
+> * Dataflow analysis&#x20;
+> * Normalization
+>
+> **MARK论文：**
+>
+> * MULTI-MH：[Cross-Architecture Bug Search in Binary Executable](https://ieeexplore.ieee.org/document/7163056)（第一篇支持跨架构的二进制代码相似检测）2015，CCF-A，技术：位置敏感的哈希（Locality sensitive hashing），CFG分析
+> * discovRE: [Efficient Cross-Architecture Identification of Bugs in Binary Code](https://www.ndss-symposium.org/wp-content/uploads/2017/09/discovre-efficient-cross-architecture-identification-bugs-binary-code.pdf)，2016，CCF-A，技术：Feature-based，根据相应控制流图的结构计算函数之间的相似性
+> * BinDNN: [Resilient Function Matching Using Deep Learning](https://link.springer.com/chapter/10.1007/978-3-319-59608-2\_29)2016，CCF-C，技术：监督式机器学习，NLP
+> * SAFE: [Self-Attentive Function Embeddings for Binary Similarity](https://link.springer.com/chapter/10.1007/978-3-030-22038-9\_15)，2019，CCF-C，技术：无需手工特征提取，NLP，Self-Attention Neural Network
+> * GENIUS：[Scalable Graph-based Bug Search for Firmware Images](https://dl.acm.org/doi/10.1145/2976749.2978370)2016，CCF-A，技术：提出CFG图匹配的昂贵开销在IoT领域的缺陷，将CFG进行高维特征向量嵌入，无监督式学习
+> * BinGo: Cross-architecture cross-OS Binary Search，2016，CCF-A，技术：“a selective inlining technique to capture the complete function semantics by inlining relevant library and user-defined functions”
+> * XMATCH：Extracting Conditional Formulas for Cross-Platform Bug Search，2017，CCF-C，技术：“extract conditional formulas as higher-level semantic features from the raw binary code to conduct the code search”
+> * cacompare：Binary Code Clone Detection Across Architectures and Compiling Configurations，2017，CCF-B技术：识别每个二进制函数的参数和间接跳转目标，并模拟这些函数的执行以提取有助于测量函数相似性的语义签名
+> * GITZ：[Similarity of Binaries Through Re-optimization](https://dl.acm.org/doi/10.1145/3062341.3062387)，2017，CCF-A，技术：
+>   1. 分割程序片段。将程序分解为strand，即基本块的数据流片段，作为相似性比较的基本单元\
+>      **strand:A strand is the list of all of the instructions from the basic block that affect the computation of a specific value.**
+>   2. 通过重新优化找到等价的代码片段。通过在strands上重新进行编译优化器的优化过程，将代码片段引入新的规范化形式，从而在后续能够**识别语法上不同但语义等价的strands**。
+>   3. 建立代码相似性。爬取部分语料库生成一个统计框架，来评估每一个strand在整个程序中的重要程度。
+> * αDiff: [Cross-version Binary Code Similarity Detection with DNN](https://dl.acm.org/doi/10.1145/3238147.3238199)，2018，CCF-A，技术：使用DNN直接提取函数内特征（intra-function feature），无需手工特征工程，再进一步分析函数调用图（function call graph），提取功能和模块间特征（inter-function and inter-module features）
+> * VulSeeker: [A Semantic Learning Based Vulnerability Seeker for Cross-platform Binary](https://dl.acm.org/doi/10.1145/3238147.3240480)，2018，CCF-A，技术：首先构建标记的语义流图，并提取基本块特征作为两者的数值向量。然后，通过将基本块的数值向量馈送到定制的语义感知DNN模型，生成整个二元函数的嵌入向量。最后，基于余弦距离测量两个二元函数的相似性。
+> * A Cross-Architecture Instruction Embedding Model for Natural Language Processing-Inspired Binary Code Analysis，2019
+> * INNEREYE：[Neural Machine Translation Inspired Binary Code Similarity Comparison beyond Function Pairs](https://www.ndss-symposium.org/wp-content/uploads/2019/02/ndss2019\_11-4\_Zuo\_paper.pdf)，2019，CCF-A，技术：NLP——将指令视为单词，将基本块视为句子，并提出了一种新颖的跨（汇编）语言深度学习方法
+
 
 
 ### OVERVIEW
@@ -125,4 +172,8 @@ BCSD方法的三个特征
   * similar：their syntax, structure, or semantics are similar
 * 被比较的二进制代码的粒度（granularity）：指令、基本块、函数  “instructions, basic blocks, functions”
 * 正在比较的输入块的数量：一对一、一对多、多对多
-*
+
+
+
+
+
