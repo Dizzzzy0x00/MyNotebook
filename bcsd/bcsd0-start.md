@@ -136,6 +136,9 @@ fun:
 >
 > **MARK论文：**
 >
+>
+>
+> * Rendezvous: a search engine for binary code，2013，CCF-C，技术：二进制函数的搜索引擎，给定查询函数的二进制代码，在存储库中查找具有类似语法和结构属性的其他函数
 > * MULTI-MH：[Cross-Architecture Bug Search in Binary Executable](https://ieeexplore.ieee.org/document/7163056)（第一篇支持跨架构的二进制代码相似检测）2015，CCF-A，技术：位置敏感的哈希（Locality sensitive hashing），CFG分析
 > * discovRE: [Efficient Cross-Architecture Identification of Bugs in Binary Code](https://www.ndss-symposium.org/wp-content/uploads/2017/09/discovre-efficient-cross-architecture-identification-bugs-binary-code.pdf)，2016，CCF-A，技术：Feature-based，根据相应控制流图的结构计算函数之间的相似性
 > * BinDNN: [Resilient Function Matching Using Deep Learning](https://link.springer.com/chapter/10.1007/978-3-319-59608-2\_29)2016，CCF-C，技术：监督式机器学习，NLP
@@ -175,5 +178,38 @@ BCSD方法的三个特征
 
 
 
+### APPROACHES
+
+#### _Comparison Type 比较类型_
+
+从两个维度分析这一点：
+
+* _**Input comparison**_：没有方法对比输入到输出的等价性，因为是一个不可判定问题（V. A. Zakharov, “The Equivalence Problem for Computational Models: Decidable and Undecidable Cases,” in International Conference on Machines, Computations, and Universality, 2001.）；one-to-one (OO, 21 approaches), oneto-many (OM, 30 approaches), and many-to-many (MM, 10 approaches)
+  * OM比较时，大多数的方法并不是依据相似度进行排序再输出（效率低下），而是将从每个二进制输入提取特征向量，并存入具有索引的存储库，每个输入只进行一次特征提取（经典空间代价换取时间代价），另一种解决方案是在特征向量中的特征子集上添加索引，目的是为了减少比较次数
+* _**Approach comparison**_：主要都是**相似性**，等价和相同的研究较少
 
 
+
+#### _Granularity 粒度_
+
+也是两个维度：
+
+* Input Granularity：总的来说就是指令、基本块、函数  “instructions, basic blocks, functions”，文章细分为了八类：instruction (I), set of related instructions (I\*), basic block (B), set of related basic blocks (B\*), function (F), set of related functions (F\*), trace (T), and whole program (P)
+* Approach Granularities
+
+
+
+#### _Syntactic Similarity 句法相似性_
+
+具体一点来说就是比较指令序列，原理：一般来说，序列中的指令在虚拟地址空间中是连续的，属于同一函数，首先规范化指令（方法有：仅考虑助记符、仅考虑操作码，或者将操作数规范化为约定的类型）
+
+获取指令序列有两种：
+
+* 定长：使用滑动窗口，例子：given the sequence of instruction mnemonics {mov, push, add} two 2-grams will be extracted: {mov, push} and {push, add}.
+* 变长
+
+对比指令相似的三种方式：
+
+* _**hashing 哈希：**_从可变长度指令序列中获取固定长度值（哈希值）
+* _**embedding 嵌入：**_从n元语法序列（n-gram sequences）生成嵌入
+* _**alignment 对齐：**_三种方法（EXECDIFF、TRACY、BINSEQUENCE）通过在两个序列中插入间隙来解释插入、删除和修改的指令，从而对齐两个序列以在它们之间产生映射。
