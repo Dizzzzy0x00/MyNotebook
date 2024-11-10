@@ -260,7 +260,30 @@ _**(Sub)Graph isomorphism （子）图同构**_：判断结构相似性的方法
 1. feature selection：手工选取特征
 2. feature encoding：从训练数据中自动生成实值特征向量，NLP
 
+另一种方式是直接对二进制代码进行embedding嵌入
+
 #### _**Machine learning 机器学习**_
 
-在二进制相似检测中的三种用法：1）生成嵌入，（2）使用无监督学习对相似的二进制代码片段进行聚类，（3）根据概率进行分类判断二进制代码片段是从同一源代码编译而来
+在二进制相似检测中的三种用法：（1）生成嵌入，（2）使用无监督学习对相似的二进制代码片段进行聚类，（3）根据概率进行分类判断二进制代码片段是从同一源代码编译而来
 
+#### _Hashing 哈希_
+
+* cryptographic hashes
+* locality-sensitive hashes
+* executable file hashes
+
+***
+
+#### _**Supported Architectures 跨架构支持**_
+
+实现跨架构支持的一种方式是：将二进制代码提升为与体系结构无关的代码，然后，无论原始体系结构如何，都可以对 IR 进行相同的分析。优点是分析仅依赖于 IR
+
+另一种方式是使用[基于特征的相似性](bcsd0-start.md#featurebased-similarity-ji-yu-te-zheng-de-xiang-si-xing)，对每个架构使用单独的模块来获取捕获二进制代码语义的特征向量
+
+***
+
+#### _Type of Analysis 分析方式_
+
+* Static analysis
+* Dynamic analysis
+* Dataflow analysis：数据流分析用于检查值如何在代码中传播。它包括要跟踪的数据源（例如，保存特定变量的寄存器或内存位置）、定义值如何通过不同指令或 IR 语句传播的传播规则，以及接收器（即检查到达它们的值的程序点）。
