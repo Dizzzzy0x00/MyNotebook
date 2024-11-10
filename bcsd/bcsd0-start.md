@@ -188,7 +188,7 @@ BCSD方法的三个特征
   * OM比较时，大多数的方法并不是依据相似度进行排序再输出（效率低下），而是将从每个二进制输入提取特征向量，并存入具有索引的存储库，每个输入只进行一次特征提取（经典空间代价换取时间代价），另一种解决方案是在特征向量中的特征子集上添加索引，目的是为了减少比较次数
 * _**Approach comparison**_：主要都是**相似性**，等价和相同的研究较少
 
-
+***
 
 #### _Granularity 粒度_
 
@@ -197,7 +197,7 @@ BCSD方法的三个特征
 * Input Granularity：总的来说就是指令、基本块、函数  “instructions, basic blocks, functions”，文章细分为了八类：instruction (I), set of related instructions (I\*), basic block (B), set of related basic blocks (B\*), function (F), set of related functions (F\*), trace (T), and whole program (P)
 * Approach Granularities
 
-
+***
 
 #### _Syntactic Similarity 句法相似性_
 
@@ -214,7 +214,7 @@ BCSD方法的三个特征
 * _**embedding 嵌入：**_从n元语法序列（n-gram sequences）生成嵌入
 * _**alignment 对齐：**_三种方法（EXECDIFF、TRACY、BINSEQUENCE）通过在两个序列中插入间隙来解释插入、删除和修改的指令，从而对齐两个序列以在它们之间产生映射。
 
-
+***
 
 #### _Semantic Similarity 语义相似性_
 
@@ -227,7 +227,7 @@ BCSD方法的三个特征
   * Semantic hashes：规范化表达式（例如，使用通用寄存器名称）并简化它们（例如，应用常数传播）之后，检查两个符号公式是否具有相同的哈希值，缺点：可能出现再规范化和简化之后哈希值不同，但是其实两个表达式是等同/相似的
   * Graph distance：将一个基本块的符号表达式表示为一颗树，然后计算树的图相似性来衡量两个基本块的相似性
 
-
+***
 
 #### _Structural Similarity 结构相似性_
 
@@ -238,11 +238,29 @@ BCSD方法的三个特征
 * _**callgraph (CG)：**_节点是函数，边捕获调用者-被调用者关系
 * 其他：_**register flow graph、execution dependence graph**_
 
-_**(Sub)Graph isomorphism （子）图同构**_：判断结构相似性的方法大多需要判断图像的
+_**(Sub)Graph isomorphism （子）图同构**_：判断结构相似性的方法大多需要判断图的同构性，而一般的图同构要求两个图中的**节点集基数相同**（两个图 G 和 H 的同构是它们节点集之间的边保留双向映射 f，这样如果任意两个节点 u、v 在 G 中相邻，则 f (u) 和 f (v) 在 H 中也相邻。），这对于二进制代码相似性来说太严格了。所以二进制相似性检测使用的替代方法是：_**subgraph isomorphism 子图同构**_（确定 G 是否包含与 H 同构的子图），子图同构是一个NP完全问题（NP-complete problem），也有的方法寻找最大公共子图同构（maximum common subgraph isomorphism，MCS）也是一个NP完全问题
+
+对于昂贵的计算开销，一些方法尝试做出了优化，例如：DR2005 避免比较具有相同哈希值的 CFG（匹配）和具有非常不同节点数和边数（不太可能匹配）的 CFG。IBINHUNT 通过为基本块分配污点标签来减少要考虑的节点数。子图同构中仅考虑具有相同污点标签的节点。这些筛选过滤图的方法分为两类：贪婪算法和回溯算法。
+
+* _**贪婪算法 Greedy**_ ：执行邻域探索。首先确定一组初始匹配节点。然后，通过仅检查已匹配节点的邻居（即父节点或子节点）来递归扩展匹配。BMAT、F2004、DR2005、LKI2013、TEDEM、MULTI-MH、KLKI2016、KAM1N0、BINSEQUENCE 和 BINARM 使用此方法。贪婪算法的局限性在于早期错误会传播，从而大大降低准确性。
+* _**回溯算法 Backtracking**_：通过重新访问解决方案来修复错误匹配，如果新匹配不能改善整体匹配，则将其恢复（BMM2006、BINHUNT、IBINHUNT、MXW2015、QSM2015、DISCOVRE）。回溯成本更高，但可以通过避免局部最优匹配来提高准确性。
 
 
 
+* K-subgraph matching：将一个图划分为 k 个子图，每个子图仅包含 k 个连通节点。然后为每个 k 个子图生成一个指纹，两个图的相似度对应于匹配的最大 k 个子图数量
+* Path similarity：将函数相似度转换为路径相似度比较，首先，从 CFG 中提取一组执行路径，然后定义执行路径之间的路径相似性度量，最后将路径相似性组合成函数相似性。
+* Graph embedding：从每个图中获取实值特征向量，然后计算特征向量的相似度。
 
+***
 
+#### _Feature-Based Similarity 基于特征的相似性_
 
+将一段二进制代码表示为一个向量或一组特征，使得相似的二进制代码具有相似的特征向量或特征集
+
+1. feature selection：手工选取特征
+2. feature encoding：从训练数据中自动生成实值特征向量，NLP
+
+#### _**Machine learning 机器学习**_
+
+在二进制相似检测中的三种用法：1）生成嵌入，（2）使用无监督学习对相似的二进制代码片段进行聚类，（3）根据概率进行分类判断二进制代码片段是从同一源代码编译而来
 
