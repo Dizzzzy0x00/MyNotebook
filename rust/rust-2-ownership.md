@@ -71,7 +71,7 @@ let ss = "hello";
 
 `String` 由三部分组成，如图左侧所示：一个指向存放字符串内容内存的指针、一个长度和一个容量。这一组数据存储在栈上。右侧则是堆上存放内容的内存部分。
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 s是可变的，而ss是不可变的，而为了支持一个可变，可增长的文本片段，需要在堆上分配一块在编译时未知大小的内存来存放内容。这意味着：
 
@@ -97,7 +97,7 @@ let s2 = s1;
 
 这段代码执行以后，内存中的表现是这样的：
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 看这张图，**s1部分为灰色**，是因为在 `let s2 = s1;` 之后，Rust 认为 s1 不再有效
 
