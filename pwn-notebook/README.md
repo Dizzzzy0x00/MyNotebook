@@ -569,7 +569,7 @@ p.shutdown('write')
 p.interactive()
 ```
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -687,7 +687,7 @@ p.interactive()
 
 ​ 特别的，要注意格式化字符 “ **%n** ” ，它的功能是将 %n 之前打印出来的**字符个数**，赋值给一个变量
 
-![](https://f/C/png/string\_1.png)
+![](https://f/C/png/string_1.png)
 
 比如在上面这段代码，看到通过格式化字符串“%n”成功修改了 变量a 的值
 
@@ -699,7 +699,7 @@ p.interactive()
 
 IDA伪代码：
 
-![string\_2](https://f/C/png/string\_2.png)
+![string\_2](https://f/C/png/string_2.png)
 
 其中
 
@@ -731,19 +731,19 @@ a填充字符（0x70-0xC）+canary+canary距离返回地址的偏移（0xC）+�
 
 1. 查看pwnme地址
 
-![string\_3](https://f/C/png/string\_3.png)
+![string\_3](https://f/C/png/string_3.png)
 
 2.通过多次printf不断打印%p泄露内存的地址 从而看到偏移量
 
 aaaa-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p-%p
 
-![string\_5](https://f/C/png/string\_5.png)
+![string\_5](https://f/C/png/string_5.png)
 
 最后写exp 在绕过了无用的输入后到达可以利用点然后输入payload，成功pwn\~
 
 payload构造时注意：使pwnme的值为8要求在%10$n之前有8字符内容，32地址是4字节所以要再填充 8-4=4个字符（此处用a）
 
-![string\_4](https://f/C/png/string\_4.png)
+![string\_4](https://f/C/png/string_4.png)
 
 ### 伪随机数绕过
 

@@ -31,12 +31,12 @@ coverY: -140
       <figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
 *   **Adversarial NLP Attacks** 对抗性NLP攻击
 
-    * **“text containing **_**“**_[_**perturbations**_](#user-content-fn-2)[^2]_**”**_** to fool a machine learning model”**
+    * **“text containing&#x20;**_**“**_[_**perturbations**_](#user-content-fn-2)[^2]_**”**_**&#x20;to fool a machine learning model”**
     * 使用模型词汇表中没有的单词/标记（或由于其稀有性而表示不佳） -故意拼错单词 -罕见词汇 -混合语言（如果模型是用特定语言训练的） 交换特定单词/标记以混淆模型。
     * [**Towards a Robust Deep Neural Network in Texts: A Survey**](#user-content-fn-3)[^3]
     * 两种对抗性NLP攻击
-      * **White-box attacks：**攻击者有模型架构和权重，（1）untargeted：让分类器分错即可，最大化损失函数以混淆模型，使其预测的类别与预期的类别不同（2）target：不仅要分类错误，还要让分类器给出指定类别
-      * **Black-box attacks：**攻击者仅能访问模型API观察输入与输出的关系，不知道模型架构和权重手段：**word importance** metric 词重要性度量
+      * **White-box attacks：**&#x653B;击者有模型架构和权重，（1）untargeted：让分类器分错即可，最大化损失函数以混淆模型，使其预测的类别与预期的类别不同（2）target：不仅要分类错误，还要让分类器给出指定类别
+      * **Black-box attacks：**&#x653B;击者仅能访问模型API观察输入与输出的关系，不知道模型架构和权重手段：**word importance** metric 词重要性度量
         * 词重要性度量帮助攻击者识别在推理过程中对模型分类贡献最大的词。具体做法是通过多个**前向传递**（forward passes），逐个删除输入句子中的词或标记，观察模型在真值标签（ground truth label）上的置信度如何变化。
         * 如果删除某个词导致模型的置信度显著下降，说明该词在分类过程中起到了关键作用。反之，删除某个词对置信度影响不大，说明该词的重要性较低。
         * 在完成词重要性度量后，攻击者可以根据各个词的重要性进行排序，选择那些对分类最重要的词作为攻击目标
@@ -45,7 +45,7 @@ coverY: -140
 
 
 
-    <figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Example of an adversarial NLP Attack [2]</p></figcaption></figure>
+    <figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Example of an adversarial NLP Attack [2]</p></figcaption></figure>
 
 
 

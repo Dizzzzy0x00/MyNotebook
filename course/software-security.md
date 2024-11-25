@@ -231,7 +231,7 @@ address of system() 确定：根据libc版本
 
 #### ROP链
 
-寻找gadget代码片段来拼接实现目标操作，要求每个gadget**最后一条指令都是`ret`**，ret指令会`pop eip`，继续执行后面的gadget，形成**`rop链`**
+寻找gadget代码片段来拼接实现目标操作，要求每个gadget**最后一条指令都是`ret`**，ret指令会`pop eip`，继续执行后面的gadget，形&#x6210;**`rop链`**
 
 **`payload：padding1 + address of gadget1 + address of gadget2 +... + address of gadgetn+shellcode`**
 
@@ -532,7 +532,7 @@ Ollydbg（OD）：
 
 
 
-**INT3断点：**执行一个INT 3断点时，该处的内存地址内容被改为了**INT 3 （0xCC），触发异常，**调试器捕捉异常从而停留在断点处
+**INT3断点：**&#x6267;行一个INT 3断点时，该处的内存地址内容被改为了**INT 3 （0xCC），触发异常，**&#x8C03;试器捕捉异常从而停留在断点处
 
 {% hint style="info" %}
 INT3断点存在的问题：改变了原有的汇编指令，容易被软件检测到，例如在MessageBoxA函数就存在INT3断点的检测：

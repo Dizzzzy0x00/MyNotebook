@@ -27,7 +27,7 @@ MyGitBook
 
 ## AFL-gcc.c
 
-首先从程序的入口点**`main(int argc, char** argv)`**开始分析：在main中AFL 会初始化，开始其模糊测试流程。所有的输入参数都会在这里被处理，整个程序的执行流程从这里开始。
+首先从程序的入口&#x70B9;**`main(int argc, char** argv)`**&#x5F00;始分析：在main中AFL 会初始化，开始其模糊测试流程。所有的输入参数都会在这里被处理，整个程序的执行流程从这里开始。
 
 ```cpp
 int main(int argc, char** argv) {
@@ -328,7 +328,7 @@ static u8** cc_params;              /* Parameters passed to the real CC  */
 
 ## AFL-as.c
 
-还是一样的从程序入口点**`int main(int argc, char** argv)`**开始分析，这里只摘取关键的部分进行分析：
+还是一样的从程序入口&#x70B9;**`int main(int argc, char** argv)`**&#x5F00;始分析，这里只摘取关键的部分进行分析：
 
 ```cpp
 int main(int argc, char** argv) {
@@ -1031,7 +1031,7 @@ EXP_ST void setup_signal_handlers(void) {
 2. check\_crash\_handling(): 确保核心转储不会进入程序，这里也就是运行 AFL 是需要修改 `/proc/sys/kernel/core_pattern` 的检查位置，将该文件内容设置为 core 主要是为了避免计算机把 crash 误认成超时。
 3. check\_cpu\_governor(): 该函数主要检查 CPU governor 相关内容，在 fuzz 过程中基本不太常遇见
 
-调用**`setup_shm()`**设置共享内存
+调&#x7528;**`setup_shm()`**&#x8BBE;置共享内存
 
 ```c
 EXP_ST void setup_shm(void) {

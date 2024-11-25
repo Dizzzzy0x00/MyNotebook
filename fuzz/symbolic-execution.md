@@ -151,6 +151,6 @@ if __name__ == "__main__":
     Go()
 ```
 
-运行结果如下，得到目标输出_`[+] Success! Solution is: HETOBRCU`_：
+运行结果如下，得到目标输&#x51FA;_`[+] Success! Solution is: HETOBRCU`_：
 
 <figure><img src="../.gitbook/assets/image (73).png" alt=""><figcaption></figcaption></figure>
