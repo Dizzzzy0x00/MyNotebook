@@ -27,6 +27,7 @@
   * [BCSD0-START](vulnerability-detection/bcsd/bcsd0-start.md)
   * [BCSD1-Awesome-Binary-Similarity](vulnerability-detection/bcsd/bcsd1-awesome-binary-similarity.md)
   * [BCSD1-Algorithm1——CFG](vulnerability-detection/bcsd/bcsd1-algorithm1-cfg.md)
+  * [BCSD-2 Graph in BCSD](vulnerability-detection/bcsd/bcsd-2-graph-in-bcsd.md)
 
 ## Fuzz
 
