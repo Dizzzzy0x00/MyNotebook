@@ -21,7 +21,7 @@ slice 允许引用某个集合中一段连续的元素序列，而不用引用�
 
 不同于整个 String 的引用，hello 是一个部分 String 的引用，由一个额外的 \[0..5] 部分指定。可以使用一个由中括号中的 \[starting\_index..ending\_index] 指定的 range 创建一个 slice，其中 starting\_index 是 slice 的第一个位置，ending\_index 则是 slice 最后一个位置的后一个值。在其内部，slice 的数据结构存储了 slice 的开始位置和长度，长度对应于 ending\_index 减去 starting\_index 的值
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ```rust
 //slice一些关于开头和结尾的省略：

@@ -28,7 +28,7 @@ coverY: -140
       * 应用OCR（光学字符识别），以避免不可见字符和同形符号的问题，因为OCR模型将以与人类相同的方式“看到”文本。 [**Bad Characters: Imperceptible NLP Attacks**](#user-content-fn-1)[^1][**https://zhuanlan.zhihu.com/p/675827506**](https://zhuanlan.zhihu.com/p/675827506)
       * 使用聚类方法将视觉上相似的Unicode字符组合在一起
 
-      <figure><img src="../.gitbook/assets/image (4).png" alt=""><figcaption></figcaption></figure>
+      <figure><img src="../.gitbook/assets/image (4) (1).png" alt=""><figcaption></figcaption></figure>
 *   **Adversarial NLP Attacks** 对抗性NLP攻击
 
     * **“text containing&#x20;**_**“**_[_**perturbations**_](#user-content-fn-2)[^2]_**”**_**&#x20;to fool a machine learning model”**
@@ -45,7 +45,7 @@ coverY: -140
 
 
 
-    <figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Example of an adversarial NLP Attack [2]</p></figcaption></figure>
+    <figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>Example of an adversarial NLP Attack [2]</p></figcaption></figure>
 
 
 

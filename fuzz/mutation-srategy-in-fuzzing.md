@@ -35,7 +35,7 @@ description: 模糊测试的变异策略
 
 动态符号执行通过结合实际执行与符号化执行来跟踪程序的实际和符号化状态。这种方法通过使用实际值替换难以求解的约束，可以缓解静态符号执行所面临的问题，并采用深度优先的搜索策略对目标程序进行探索。但是使用动态符号执行技术的一个问题是，由于程序分支的存在，在大型复杂的程序上容易出现路径爆炸的问题，解决的一种办法是通过启发式的方法,选择比较重要的路径进行探索。如图展示了一个使用符号执行来指导模糊测试变异策略的基本流程。
 
-<figure><img src="../.gitbook/assets/image (5).png" alt=""><figcaption><p>符号执行指导的变异策略基本流程</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (5) (1).png" alt=""><figcaption><p>符号执行指导的变异策略基本流程</p></figcaption></figure>
 
 ### 数据流敏感的模糊测试
 
@@ -45,7 +45,7 @@ description: 模糊测试的变异策略
 
 将污点分析技术应用到模糊测试中,并降低其资源消耗是近年来的重要研究方向之一，比如GreyOne\[14]尝试通过减少污点分析跟踪的对象、降低污点分析的开销、提升模糊测试的检测效率,其设计思路如下图所示。
 
-<figure><img src="../.gitbook/assets/image (6).png" alt=""><figcaption><p>GreyOne污点分析技术指导的模糊测试设计流程</p></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (6) (1).png" alt=""><figcaption><p>GreyOne污点分析技术指导的模糊测试设计流程</p></figcaption></figure>
 
 ### 深度学习指导的模糊测试
 

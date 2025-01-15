@@ -3,6 +3,7 @@
 ## course
 
 * [🐒 Deep Learning with Graphs](README.md)
+  * [Blog Reading](course/deep-learning-with-graphs/blog-reading.md)
 * [Cybersecurity Technology Notebook](course/cybersecurity-technology-notebook.md)
 * [Cyber attack and defense Notebook](course/cyber-attack-and-defense-notebook.md)
 * [Pytorch Notebook](course/pytorch-notebook.md)
