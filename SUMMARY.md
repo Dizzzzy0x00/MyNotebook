@@ -10,6 +10,7 @@
 * [NISP二级\&hvv](course/nisp-er-ji-hvv.md)
 * [Software Security](course/software-security.md)
 * [Assembly Language Notebook](course/assembly-language-notebook.md)
+* [Web攻击检测](course/web-gong-ji-jian-ce.md)
 
 ***
 
