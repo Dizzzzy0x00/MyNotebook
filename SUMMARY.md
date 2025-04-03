@@ -8,7 +8,8 @@
 * [Cyber attack and defense Notebook](course/cyber-attack-and-defense-notebook.md)
 * [Pytorch Notebook](course/pytorch-notebook.md)
 * [NISP二级\&hvv](course/nisp-er-ji-hvv.md)
-* [Software Security](course/software-security.md)
+* [Software Security](course/software-security/README.md)
+  * [WindowsAPI](course/software-security/windowsapi.md)
 * [Assembly Language Notebook](course/assembly-language-notebook.md)
 * [Web攻击检测](course/web-gong-ji-jian-ce.md)
 

@@ -65,11 +65,11 @@
 #### 漏洞分类（按原理分类）
 
 * 二进制
-  * [栈溢出](software-security.md#zhan-yi-chu)
-  * [堆溢出](software-security.md#dui-yi-chu)
-  * [格式化字符串](software-security.md#ge-shi-hua-zi-fu-chuan-lou-dong)
+  * [栈溢出](./#zhan-yi-chu)
+  * [堆溢出](./#dui-yi-chu)
+  * [格式化字符串](./#ge-shi-hua-zi-fu-chuan-lou-dong)
   * Double Free
-  * [UAF](software-security.md#uaf)
+  * [UAF](./#uaf)
   * 整形溢出
 * WEB
   * SQL注入
@@ -157,13 +157,13 @@ int main()
 ### 漏洞利用
 
 * 栈溢出
-  * [shellcode覆盖法](software-security.md#shellcode-fu-gai-fa)
-  * [SEH覆盖](software-security.md#seh-fu-gai-fa)
-  * [ret2libc](software-security.md#ret2libc)
-  * [ROP](software-security.md#rop-lian)
+  * [shellcode覆盖法](./#shellcode-fu-gai-fa)
+  * [SEH覆盖](./#seh-fu-gai-fa)
+  * [ret2libc](./#ret2libc)
+  * [ROP](./#rop-lian)
 * 堆溢出
-  * [堆喷射](software-security.md#dui-pen-she)
-  * [fastbin attack](software-security.md#fastbin-attack)
+  * [堆喷射](./#dui-pen-she)
+  * [fastbin attack](./#fastbin-attack)
 
 #### shellcode覆盖法
 
@@ -201,7 +201,7 @@ typedef struct _EXCEPTION_REGISTRATION_RECORD
 
 ```
 
-<figure><img src="../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (14).png" alt=""><figcaption></figcaption></figure>
 
 #### SEH覆盖法实操
 
@@ -256,12 +256,12 @@ fastbin使用`单向链表`来维护释放的堆块的，并且由fastbin管理�
 
 ### 操作系统的保护机制
 
-* [GS机制](software-security.md#gs-ji-zhi)
-* [DEP机制](software-security.md#dep-ji-zhi)
+* [GS机制](./#gs-ji-zhi)
+* [DEP机制](./#dep-ji-zhi)
 * SEH机制（见前面的章节）
-* [ASLR机制](software-security.md#aslr-ji-zhi)
-* [SafeSEH机制](software-security.md#safeseh-ji-zhi)
-* [CFG机制](software-security.md#cfg-ji-zhi)
+* [ASLR机制](./#aslr-ji-zhi)
+* [SafeSEH机制](./#safeseh-ji-zhi)
+* [CFG机制](./#cfg-ji-zhi)
 
 
 
@@ -398,15 +398,15 @@ Android三种数据存储方式
 
 使用AndroidKiller分析apk包：
 
-<figure><img src="../.gitbook/assets/3b15959fbab71e4eb89df300bd0f8d1.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/3b15959fbab71e4eb89df300bd0f8d1.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/284c078e7aa6a05d2809bb84be46d7e.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/284c078e7aa6a05d2809bb84be46d7e.png" alt=""><figcaption></figcaption></figure>
 
 阅读Java伪代码可以快速分析出程序的内部实现逻辑，再去字节码中寻找对应的部分进行下一步分析。
 
 想要输出right++就必须绕过这个不可能成立的if语句，在字节码中找到这个跳转，将跳转条件取反，重新编译apk即可
 
-<figure><img src="../.gitbook/assets/1992d853372156166ecc6aca221215a.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/1992d853372156166ecc6aca221215a.png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -414,7 +414,7 @@ Android三种数据存储方式
 
 要求：破解注册码
 
-<figure><img src="../.gitbook/assets/cecf80e3ad33c30ae3a45311d78d3cc.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/cecf80e3ad33c30ae3a45311d78d3cc.png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -436,43 +436,43 @@ JDK：jdk1.8.0\_281
 
 &#x20;
 
-<figure><img src="../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (16).png" alt=""><figcaption></figcaption></figure>
 
 使用AndroidKiller\_v1.3打开这个apk，然后对其进行重新编译打包，将AndroidKiller重新编译的apk放入模拟器中，成功安装：
 
-<figure><img src="../.gitbook/assets/image (17).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (17).png" alt=""><figcaption></figcaption></figure>
 
 在模拟器中运行刚刚安装的caculate，根据提示需要将数目添加到87654321才能通关，并且软件中的添加按钮点击以后数值+1，显然我们要想办法绕过这个“点击87654321次”的条件
 
-<figure><img src="../.gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (20).png" alt=""><figcaption></figcaption></figure>
 
 回到AndroidKiller中分析apk伪代码，首先找到主程序入口，在设置了需要的点击次数（87654321）之后监听按钮“添加”
 
-<figure><img src="../.gitbook/assets/image (21).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (21).png" alt=""><figcaption></figcaption></figure>
 
 接下来分析clickListener函数，在点击数达到需求以后执行paramAnonymousMessage = new Intent(MainActivity.this, success.class)启动succcess.class，然后获取一个字符串（根据success.class名字猜测应该是最后的目标字符串flag）：
 
-<figure><img src="../.gitbook/assets/image (24).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (24).png" alt=""><figcaption></figcaption></figure>
 
 所以我们现在的任务就是想办法跳出这个while循环，最简单方式就是绕过while的执行条件判断，在smali中找到这个while循环的java字节码部分：
 
-<figure><img src="../.gitbook/assets/image (25).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (25).png" alt=""><figcaption></figcaption></figure>
 
 看到这个if-lt(if less than)语句，即当v1\<v2时跳出循环，修改这个语句（我们让v1>v2时跳出）将if-lt改为if-gt(if greater than)那么此时只需要点击一次“添加”按钮就可以达成while循环的跳出条件，执行后面的代码，重新编译修改后的apk，安装后运行并点击添加，发现成功跳出循环执行了succcess.class，但根据提示还差一步，没有得到预期的flag
 
-<figure><img src="../.gitbook/assets/image (27).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (27).png" alt=""><figcaption></figcaption></figure>
 
 观察succcess.class中的代码发现启动这个class以后将字符串“成功离你只有一步之遥。。。。。。”显示在界面上，而我们想要的this.string字符串并没有显示出来：
 
-<figure><img src="../.gitbook/assets/image (28).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (28).png" alt=""><figcaption></figcaption></figure>
 
 阅读伪代码发现onBackPressed函数触发时会将this.string作为“data”传回到上一个页面，而上一个页面会对这个“data”进行打印显示
 
-<figure><img src="../.gitbook/assets/image (29).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (29).png" alt=""><figcaption></figcaption></figure>
 
 于是根据逻辑我们需要触发这个onBackPressed函数——点击返回按钮，成功getflag：
 
-<figure><img src="../.gitbook/assets/image (30).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (30).png" alt=""><figcaption></figcaption></figure>
 
 #### 复盘
 
@@ -486,9 +486,9 @@ JDK：jdk1.8.0\_281
 
 对比原始apk和重编译的apk，发现在META-INT中多了一个MANIFEST.MF文件：
 
-<figure><img src="../.gitbook/assets/image (61).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (61).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (63).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (63).png" alt=""><figcaption></figcaption></figure>
 
 在APK文件中，MANIFEST.MF包含元数据，最关键的部分列出了APK文件中所有文件的名称以及对应的SHA-1摘要（即APK签名）所以分析得知原始的apk缺少签名而导致无法正常安装
 
@@ -619,19 +619,19 @@ int main() {
 
 样本来源于《加密与解密》，简单分析，发现明文比对密码“9981”
 
-<figure><img src="../.gitbook/assets/屏幕截图 2024-04-18 151908.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/屏幕截图 2024-04-18 151908.png" alt=""><figcaption></figcaption></figure>
 
 可以通过修改控制流，将比较跳转的jnz修改为nop指令
 
-<figure><img src="../.gitbook/assets/image (55).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (55).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (57).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (57).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (56).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (56).png" alt=""><figcaption></figcaption></figure>
 
 实现任意序列码绕过
 
-<figure><img src="../.gitbook/assets/image (58).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (58).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -639,7 +639,7 @@ int main() {
 
 直接分析核心代码，发现拿到flag需要让v7==9且v17==8，
 
-<figure><img src="../.gitbook/assets/屏幕截图 2024-04-18 161516.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/屏幕截图 2024-04-18 161516.png" alt=""><figcaption></figcaption></figure>
 
 并且每次变化v7和v17时需要满足 byte\_40E018\[10 \* v7 + v17] == 35，这个索引方式可以将其看成二维数组byte\_40E016\[v7]\[v17]
 
@@ -722,7 +722,7 @@ rel.exe
 
 样本
 
-<figure><img src="../.gitbook/assets/image (59).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (59).png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -732,19 +732,19 @@ rel.exe
 
 进行了简单的静态分析，得到了以下关键结论：程序逻辑的入口电在DialogFunc函数中，从对话框中获取用户输入的用户名和序列号，验证用户名的长度合法以后，将输入的用户名和序列号、用户名长度三次参数传入sub\_401340()这个函数进行验证，而核心的验证逻辑位于这个sub\_401340()函数中
 
-<figure><img src="../.gitbook/assets/image (64).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (64).png" alt=""><figcaption></figcaption></figure>
 
 并使用动态调试的方式成功得到“123456”对应的合法注册码：
 
-<figure><img src="../.gitbook/assets/image (65).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (65).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (66).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (66).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (67).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (67).png" alt=""><figcaption></figcaption></figure>
 
 而在IDA中，根据之前对源码的分析，想要编写注册机，需要分析sub\_401340()这个函数是如何根据用户输入用户名计算出合法的序列号并进行校验的：
 
-<figure><img src="../.gitbook/assets/image (68).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (68).png" alt=""><figcaption></figcaption></figure>
 
 在这个函数中可以看出，程序根据用户输入userinput，计算出合法的序列号，存放在v4变量中，再调用wsprintfA函数，将这个序列号值赋给userinput，最后调用lstrcmpA函数进行比对，返回结果，核心的计算是一个for循环，从索引i=0到i=length（userinput）-1，每八个一轮循环（因为byte\_405030\[8]）计算byte\_405030\[i]\*userinput\[v3++]的和作为注册码，在data段可以看到byte\_405030\[8]的值：{0x0C, 0x0A, 0x13, 0x09, 0x0C, 0x0B, 0x0A, 0x08}，由此编写解密代码如下：
 
@@ -790,7 +790,7 @@ int main(){
 
 运行结果如下，成功根据用户输入计算出合法的注册码（123456——2180）：
 
-<figure><img src="../.gitbook/assets/image (69).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (69).png" alt=""><figcaption></figcaption></figure>
 
 
 
