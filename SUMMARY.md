@@ -2,23 +2,21 @@
 
 ## course
 
-* [🐒 Deep Learning with Graphs](README.md)
-  * [Blog Reading](course/deep-learning-with-graphs/blog-reading.md)
+* [Deep Learning](README.md)
+  * [Deep Learning with graph](course/deep-learning/deep-learning-with-graph.md)
+  * [GNN Blog Reading](course/deep-learning/gnn-blog-reading.md)
 * [Cybersecurity Technology Notebook](course/cybersecurity-technology-notebook.md)
+* [CTF Encode Summary](course/ctf-encode-summary.md)
+* [Pwn Notebook](course/pwn-notebook/README.md)
+  * [House of](course/pwn-notebook/house-of.md)
+  * [Vulnerability Discovery](course/pwn-notebook/vulnerability-discovery.md)
+* [Software Security](course/software-security/README.md)
+  * [WindowsAPI](course/software-security/windowsapi.md)
 * [Cyber attack and defense Notebook](course/cyber-attack-and-defense-notebook.md)
 * [Pytorch Notebook](course/pytorch-notebook.md)
 * [NISP二级\&hvv](course/nisp-er-ji-hvv.md)
-* [Software Security](course/software-security/README.md)
-  * [WindowsAPI](course/software-security/windowsapi.md)
 * [Assembly Language Notebook](course/assembly-language-notebook.md)
 * [Web攻击检测](course/web-gong-ji-jian-ce.md)
-
-***
-
-* [Pwn Notebook](pwn-notebook/README.md)
-  * [House of](pwn-notebook/house-of.md)
-  * [Vulnerability Discovery](pwn-notebook/vulnerability-discovery.md)
-* [CTF Encode Summary](ctf-encode-summary.md)
 
 ## BCSD
 

@@ -1,6 +1,6 @@
 ---
 description: CTF中常见编码特征总结
-cover: .gitbook/assets/101012194_p0_master1200.jpg
+cover: ../.gitbook/assets/101012194_p0_master1200.jpg
 coverY: 126.72933549432739
 layout:
   cover:

@@ -502,7 +502,7 @@ _IO_flush_all_lockp (int do_lock)
 }
 ```
 
-<figure><img src="../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 而\_IO\_flush\_all\_lockp 不需要攻击者手动调用，在一些情况下这个函数会被系统调用：
 
@@ -592,13 +592,13 @@ _IO_flush_all_lockp (int do_lock)
 
 首先是菜单，可以看到题目提供的几个功能
 
-<figure><img src="../.gitbook/assets/8467c250d7fd4904f2d57760f16a745.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/8467c250d7fd4904f2d57760f16a745.png" alt=""><figcaption></figcaption></figure>
 
 通过build还原一下house的结构体：
 
-<figure><img src="../.gitbook/assets/6143255d6d67f0ca697ed3448890ffe.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/6143255d6d67f0ca697ed3448890ffe.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/81806a5cd30c1721543518d4d1640b8.jpg" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/81806a5cd30c1721543518d4d1640b8.jpg" alt=""><figcaption></figcaption></figure>
 
 这里虽然检查house数量最大为3，但是注意没有index索引访问house，指针house\_arry始终指向最新的house，也就是说我们在build之后可以通过upgrade来更新house，一共有四次创建的机会和三次修改的机会
 
@@ -612,7 +612,7 @@ _IO_flush_all_lockp (int do_lock)
 
 首先我们先尝试分配一个堆块并查看此时的top\_chunk size：
 
-<figure><img src="../.gitbook/assets/5fc881ed52444ac6f53e4f40bfbadd7.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/5fc881ed52444ac6f53e4f40bfbadd7.png" alt=""><figcaption></figcaption></figure>
 
 ````python
 ```python
@@ -659,13 +659,13 @@ upgrade(len(payload),payload)
 ```
 ````
 
-<figure><img src="../.gitbook/assets/dc01fe798cbfade540f11c8e4882c54 (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/dc01fe798cbfade540f11c8e4882c54 (1).png" alt=""><figcaption></figcaption></figure>
 
 然后第二步就是说我们让那个topchunk挂到unsorted bin中，那么我们就需要再次申请一个chunk，大小要大于刚刚的top chunk。但是要注意不能大于malloc的分配阈值，也就是mp\_.mmap\_threshold，否则的话会去调用mmap申请空间，会申请在libc上面。成功将unsorted bin就相当于实现了一次free，这也就是houseoforange中针对没有free函数实现的绕过
 
-<figure><img src="../.gitbook/assets/9d326465f847802a4432d4a85b16609.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/9d326465f847802a4432d4a85b16609.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>unsorted bin链表回顾</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>unsorted bin链表回顾</p></figcaption></figure>
 
 接下来进行libc版本泄露：
 
@@ -673,9 +673,9 @@ upgrade(len(payload),payload)
 
 泄露libc需要进行unsorted bin攻击：unsortedbin使用双向循环链表，在该链表中必有一个节点（循环链表实际上没有头尾，不准确的说是尾节点）的 `fd` 指针会指向 `main_arena` 结构体内部，将一个 `chunk` 放入 `Unsorted Bin` 中后再打出其 `fd`，对处于链表尾的节点 `show` 就可以获得 `libc` 的基地址了。而`Unsorted Bin` 里面只存在一个 `bin` （就是我们之前放入的top chunk）的时候，该 `bin` 的 `fd` 和 `bk` 都会指向 `main_arena` 中。我们申请一块堆，这块堆会从unsorted bin（之前的top chunk中）进行切割：
 
-<figure><img src="../.gitbook/assets/4fe7f72fbea23cd2f1c7883075cb3ac.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/4fe7f72fbea23cd2f1c7883075cb3ac.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../.gitbook/assets/02ec278f436c52f3df7472d993c3211.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/02ec278f436c52f3df7472d993c3211.png" alt=""><figcaption></figcaption></figure>
 
 可以看到再我们申请到的这个从unsortedbin中切割的大小为400的块的name字段中，前八位是填充的61，后面8位是指向地址（0x7F6D009CC1E0）这就是我们需要leak的`fd` 指针（指向 `main_arena` 中的一个位置），fd与main\_arena有一个**固定偏移（因不同的 `glibc` 版本而异）**，在调试中我们知道main\_arena地址：0x7F6D009CBBE0，计算`offst = 0xC1E0-0xBBE0=0x600`
 
