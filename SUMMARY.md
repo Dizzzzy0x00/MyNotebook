@@ -18,8 +18,6 @@
 * [Assembly Language Notebook](course/assembly-language-notebook.md)
 * [Web攻击检测](course/web-gong-ji-jian-ce.md)
 
-## BCSD
-
 ## vulnerability detection
 
 * [JavaScript](vulnerability-detection/javascript.md)
