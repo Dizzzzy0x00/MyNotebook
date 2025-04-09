@@ -2,37 +2,34 @@
 
 ## Part1 Graphs
 
-
-
 ### 复杂的图结构
 
 * Arbitrary size and complex topological 任意尺寸输入和复杂的拓扑网络结构
 * No fixed node ordering or reference point 图节点无序性
 * Dynamic and have multimodal features 多模态和动态图
 
-
-
 ### Compon ents 图的基本表示
 
-* Objects：nodes 节点，vertices 顶点         **N**
-* Interactions：linkes，edges                       **E**
-* System：network，graph                           **G(N,E)**
-
-
+* Objects：nodes 节点，vertices 顶点 **N**
+* Interactions：linkes，edges **E**
+* System：network，graph **G(N,E)**
 
 #### 图的种类
 
 * Undirected 无向图
 * Directed 有向图
-* **Heterogeneous graph 异质图**   $$G = （V，E，R，T）$$
-  * **节点有不同的种类   V**
-  * **不同的边类型           E**
-  * **节点类型集合           T(Vi)**
-  * **边类型集合               R**
-  * eg: T=2时 两种类型的节点 二分图，可以进行展开拆分成U图和V图
-  *
+*   **Heterogeneous graph 异质图** $$G = （V，E，R，T）$$
 
-      <figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    * **节点有不同的种类 V**
+    * **不同的边类型 E**
+    * **节点类型集合 T(Vi)**
+    * **边类型集合 R**
+    * eg: T=2时 两种类型的节点 二分图，可以进行展开拆分成U图和V图
+    *
+
+    ```
+    <figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+    ```
 
 图的重要特征
 
@@ -40,25 +37,22 @@
   *   应用：侧面反应网络中枢节点
 
       <figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
-
-
 * Adjacency Matrix 邻接矩阵（图的矩阵表示）
   * 无向图：对称阵；有向图：非对称阵
-  * 为什么要把图表示矩阵形式：邻接矩阵  表示了图的全息信息（可以包含**节点、边、权重**），后续矩阵计算
-  * 邻接矩阵**缺点**：现实中的大多数图的邻接矩阵都是**稀疏矩阵**
-    * **Density of matrix：** $$\frac{E }{N^2}$$
-    * 针对这个问题引入：连接列表和邻接列表，只记录连接关系
-    *
+  * 为什么要把图表示矩阵形式：邻接矩阵 表示了图的全息信息（可以包含**节点、边、权重**），后续矩阵计算
+  *   邻接矩阵**缺点**：现实中的大多数图的邻接矩阵都是**稀疏矩阵**
 
-        <figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+      * **Density of matrix：** $$\frac{E }{N^2}$$
+      * 针对这个问题引入：连接列表和邻接列表，只记录连接关系
+      *
+
+      ```
+      <figure><img src="../../.gitbook/assets/image (2) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+      ```
 
 图的表示学习：自动学习特征，将各个模态的输入转为向量，将节点映射为d维向量（低维 连续 稠密—— distributed vector 分布式向量、task-independent 与下游任务无关）
 
 节点嵌入的目的：向量点乘数值（余弦相似度）反应节点的相似度
-
-
-
-
 
 ### 图的基本操作
 
@@ -156,8 +150,6 @@ $$
 
 ### 代码实战——维基百科词条DeepWalk图嵌入
 
-
-
 ```python
 import networkx as nx
 
@@ -200,10 +192,6 @@ for n in tqdm(all_nodes):
     
 ```
 
-
-
-
-
 ### LINE：大规模信息网络嵌入
 
 原文：large-scale Information Network Embedding
@@ -223,8 +211,6 @@ for n in tqdm(all_nodes):
 
 一阶邻近度是指网络中顶点之间的局部成对邻近度。 为了模拟一阶邻近度，对于每个无向边`(i, j)`，我们定义顶点`v[i]`和`v[j]`之间的联合概率，如下所示：
 
-
-
 $$
 p_1(v_i,v_j)=\frac{1}{1+exp(-\vec u_i.\vec u_j)}                  (1)
 $$
@@ -238,8 +224,6 @@ $$
 ![](https://imgconvert.csdnimg.cn/aHR0cHM6Ly91c2VyLWdvbGQtY2RuLnhpdHUuaW8vMjAxOS83LzcvMTZiY2MxNzUxOTJmM2JiZA) (3)
 
 请注意，一阶邻近度仅适用于无向图，而不适用于有向图。 通过找到最小化公式（3）中的目标的`{u[i]}, i = 1 .. |V|`，我们可以表示`d`维空间中的每个顶点。
-
-
 
 ### Node2Vec
 
@@ -339,8 +323,6 @@ $$
 
 k-layer GNN 每个节点感受野：k-hop neighborhood
 
-
-
 ## GCN 图卷积神经网络
 
 ### 拉普拉斯矩阵与图傅里叶变换
@@ -359,8 +341,8 @@ $$
 
 其中：
 
-- $$I$$ 是单位矩阵。
-- $$L$$ 是对称归一化图拉普拉斯矩阵。
+* $$I$$ 是单位矩阵。
+* $$L$$ 是对称归一化图拉普拉斯矩阵。
 
 #### 谱分解性质
 
@@ -372,8 +354,8 @@ $$
 
 其中：
 
-- $$U \in \mathbb{R}^{n \times n}$$ 是由 $$L$$ 的特征向量按特征值升序排列构成的正交矩阵（$$U^\top U = I$$），
-- $$\Lambda \in \mathbb{R}^{n \times n}$$ 是对角特征值矩阵。
+* $$U \in \mathbb{R}^{n \times n}$$ 是由 $$L$$ 的**特征向量按特征值升序排列构成的正交矩阵**（$$U^\top U = I$$），
+* $$\Lambda \in \mathbb{R}^{n \times n}$$ 是对角特征值矩阵。
 
 这意味着特征向量 $$U$$ 构成一个正交基空间，即：
 
@@ -385,8 +367,8 @@ $$
 
 图信号是定义在图节点上的函数。设图上每个节点有一个信号值，整个图的信号可以表示为一个向量：
 
-- $$x \in \mathbb{R}^n$$：表示所有节点的信号。
-- $$x_i$$：表示第 $$i$$ 个节点的信号。
+* $$x \in \mathbb{R}^n$$：表示所有节点的信号。
+* $$x_i$$：表示第 $$i$$ 个节点的信号。
 
 **图傅里叶变换**是将图信号投影到图的拉普拉斯特征空间中，定义为：
 
@@ -404,15 +386,15 @@ $$
 
 因此，图傅里叶变换和其逆变换具有如下关系：
 
-- 傅里叶变换：$$ \hat{x} = U^\top x $$
-- 逆傅里叶变换：$$ x = U \hat{x} $$
+* 傅里叶变换：$$\hat{x} = U^\top x$$
+* 逆傅里叶变换：$$x = U \hat{x}$$
 
 #### 傅里叶变换的几何含义
 
-从谱角度看，特征向量矩阵 $$U$$ 的列构成了图拉普拉斯算子的“频率基”，即：
+从谱角度看，特征向量矩阵 $$U$$ 的列构成了**图拉普拉斯算子的“频率基”**，即：
 
-- $$U$$ 的低频部分对应于图中变化缓慢的模式（平滑区域），
-- 高频部分则对应于图中变化剧烈的模式（边界、异常点）。
+* $$U$$ 的低频部分对应于图中变化缓慢的模式（平滑区域），
+* 高频部分则对应于图中变化剧烈的模式（边界、异常点）。
 
 图傅里叶变换实质上将图信号 $$x$$ 投影到由拉普拉斯矩阵特征向量构成的正交空间中：
 
@@ -422,13 +404,12 @@ $$
 
 其中：
 
-- $$u_i$$ 是第 $$i$$ 个特征向量，
-- $$\hat{x}_i$$ 是信号 $$x$$ 在基向量 $$u_i$$ 上的投影系数。
+* $$u_i$$ 是第 $$i$$ 个特征向量，
+* $$\hat{x}_i$$ 是信号 $$x$$ 在基向量 $$u_i$$ 上的投影系数。
 
 因此，**原始输入信号可以被表示为特征空间的线性组合**，这正是谱图卷积等方法的基础。
 
----
-
+***
 
 由于GNN感受野有限，太高层数的GNN计算图过于复杂，所以映入Neighborhood Aggregation：
 
