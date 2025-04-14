@@ -5,6 +5,7 @@
 * [Deep Learning](README.md)
   * [Deep Learning with graph](course/deep-learning/deep-learning-with-graph.md)
   * [GNN Blog Reading](course/deep-learning/gnn-blog-reading.md)
+  * [MCP & A2A](course/readme/mcp-and-a2a.md)
 * [Cybersecurity Technology Notebook](course/cybersecurity-technology-notebook.md)
 * [CTF Encode Summary](course/ctf-encode-summary.md)
 * [Pwn Notebook](course/pwn-notebook/README.md)
