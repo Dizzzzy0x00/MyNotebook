@@ -80,6 +80,31 @@ coverY: 135
 00401330  | cmp bl,4F                        | 4F:'O' 如果 BL 达到 0x4F 
 00401333  | jne cruehead-crackme-3.40131B    | 退出循环
 00401335  | mov dword ptr ds:[402149],ecx    | 地址 0x4020F9 处的全局变量赋值到ecx
-0040133B  | ret                              |
+0040133B  | ret                              | 
 ```
 
+然后调用cruehead-crackme-3.40133C，参数也是402008:"pppppppppzz\~\~z5678"
+
+```
+00401086 | push cruehead-crackme-3.402008 | 402008:"pppppppppzz~~z5678"
+0040108B | call cruehead-crackme-3.40133C | 取[0x402008]最后4位倒序5678到EAX：38 37 36 00
+```
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+将文件内容后4位倒序与sum值对比：
+
+```
+00401090  | add esp,4                        |
+00401093  | cmp eax,dword ptr ds:[4020F9]    | #将文件内容后4位倒序与sum值对比
+00401099  | sete al                          |
+0040109C  | push eax                         |
+0040109D  | test al,al                       |
+0040109F  | je cruehead-crackme-3.401037     |
+004010A1  | push cruehead-crackme-3.40210E   | 40210E:"CrackMe v3.0             "
+004010A6  | call cruehead-crackme-3.401346   |
+```
+
+所以我们只需要将最后4字节设置为地址里面的值就可以通过校验了：
+
+<figure><img src="../../.gitbook/assets/1b64e3914650e05288cf2066b5c2cf7 (1).png" alt=""><figcaption></figcaption></figure>

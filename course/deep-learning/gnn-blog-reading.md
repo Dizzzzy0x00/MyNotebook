@@ -20,7 +20,7 @@ description: A Gentle Introduction to Graph Neural Networks
 
 图结构信息的表示：
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 图结构数据的问题类型：
 
@@ -45,7 +45,7 @@ description: A Gentle Introduction to Graph Neural Networks
 
 <figure><img src="../../.gitbook/assets/image (6).png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption><p>所有邻接矩阵表示的图都是同质图，仅仅交换了节点顺序</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1).png" alt=""><figcaption><p>所有邻接矩阵表示的图都是同质图，仅仅交换了节点顺序</p></figcaption></figure>
 
 ## Graph Neural Network（GNN）
 
