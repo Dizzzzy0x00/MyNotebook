@@ -13,6 +13,7 @@
   * [Vulnerability Discovery](course/pwn-notebook/vulnerability-discovery.md)
 * [Software Security](course/software-security/README.md)
   * [WindowsAPI](course/software-security/windowsapi.md)
+  * [BabyReverse-CrackMe160](course/software-security/babyreverse-crackme160.md)
 * [Cyber attack and defense Notebook](course/cyber-attack-and-defense-notebook.md)
 * [Pytorch Notebook](course/pytorch-notebook.md)
 * [NISP二级\&hvv](course/nisp-er-ji-hvv.md)
