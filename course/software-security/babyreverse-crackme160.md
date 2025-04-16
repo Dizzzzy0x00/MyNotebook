@@ -108,3 +108,57 @@ coverY: 135
 所以我们只需要将最后4字节设置为地址里面的值就可以通过校验了：
 
 <figure><img src="../../.gitbook/assets/1b64e3914650e05288cf2066b5c2cf7 (1).png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/4387cd15a48e81dbc05e92a66a32c78.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/image (98).png" alt=""><figcaption></figcaption></figure>
+
+这样子就完成了crack，显示的用户名是刚刚12345678901234逐字节运算以后的结果，根据解密算法使用的异或具有可逆性，如果想要指定的用户名，可以编写注册机：
+
+```cpp
+#include <stdio.h>
+#include <string.h>
+
+int main() {
+	char user[15] = {20}; user[14] = 0; 
+	char code[19] = {0};
+	int i, len;
+	printf("Username: ");
+	fgets(user, sizeof(user), stdin);
+	len = strlen(user) - 1;
+	if(len > 14){
+		printf("too long\n");
+		return 0; 
+	}
+	int sum = 0;
+	for(i=0; i<14; i++){
+		sum += user[i];
+	}
+	for(i=0x41; i<0x4F; i++){
+		code[i-0x41] = user[i-0x41] ^ i;
+	}
+	sum = sum ^ 0x12345678;
+	code[14] = sum & 0xFF; sum = sum >> 8;
+	code[15] = sum & 0xFF; sum = sum >> 8;
+	code[16] = sum & 0xFF; sum = sum >> 8;
+	code[17] = sum & 0xFF;
+    FILE *file = fopen("CRACKME3.KEY", "w");
+    if (file == NULL) {
+        printf("Error: Unable to create file.\n");
+        return 1;
+    }
+    fwrite(code, 1, 18, file); // 写入序列号，长度为18字节
+    fclose(file);
+
+    printf("Key saved to CRACKME3.KEY\n");
+    getchar();
+    return 0;
+}
+
+```
+
+运行，成功crack并显示我们需要的用户名
+
+<figure><img src="../../.gitbook/assets/639027358c943018f43c785e3d57c9b.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/b6dcbda33896fcedc039b9bf87e6784.png" alt=""><figcaption></figcaption></figure>
