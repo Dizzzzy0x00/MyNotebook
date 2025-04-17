@@ -90,7 +90,7 @@ coverY: 135
 0040108B | call cruehead-crackme-3.40133C | 取[0x402008]最后4位倒序5678到EAX：38 37 36 00
 ```
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 将文件内容后4位倒序与sum值对比：
 
@@ -162,3 +162,36 @@ int main() {
 <figure><img src="../../.gitbook/assets/639027358c943018f43c785e3d57c9b.png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../.gitbook/assets/b6dcbda33896fcedc039b9bf87e6784.png" alt=""><figcaption></figcaption></figure>
+
+
+
+
+
+
+
+## 012-ACG-crcme1 <a href="#articlecontentid" id="articlecontentid"></a>
+
+常规PEiD检测一下，32位，未知加壳，运行，对话框可以输入name和serial
+
+在x32dbg中分析，首先看到Createfile操作，然后检测文件内容长度（0xC通过校验），然后readfile，IDA中分析一下：
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/image (100).png" alt=""><figcaption></figcaption></figure>
+
+可以看到通过校验以后输出对话框`Key File OK teraz tylko Name/Serial!`所以根据判断条件`result = ((byte[lpBuffer] ^ 0x1b) * 4)` 编写代码反推key内容：
+
+```python
+F:\Mycode\crackme\012-ACG-crcme1>python
+>>> res = [0x168,0x160,0x170,0xEC,0x13C,0x1CC,0x1F8,0xEC,0x164,0x1F8,0x1A0,0x1BC]
+>>> key = ''
+>>> for i in range(len(res)):
+...     key += chr((res[i] // 4) ^ 0x1b)
+...
+>>> print(key)
+ACG The Best
+```
+
+<figure><img src="../../.gitbook/assets/image (101).png" alt=""><figcaption></figcaption></figure>
+
+然后点击以后进行name和serial的输入

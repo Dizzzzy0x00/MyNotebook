@@ -665,7 +665,7 @@ upgrade(len(payload),payload)
 
 <figure><img src="../../.gitbook/assets/9d326465f847802a4432d4a85b16609.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>unsorted bin链表回顾</p></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption><p>unsorted bin链表回顾</p></figcaption></figure>
 
 接下来进行libc版本泄露：
 
