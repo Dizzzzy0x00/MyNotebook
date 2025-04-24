@@ -90,7 +90,7 @@ coverY: 135
 0040108B | call cruehead-crackme-3.40133C | 取[0x402008]最后4位倒序5678到EAX：38 37 36 00
 ```
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 将文件内容后4位倒序与sum值对比：
 
@@ -175,7 +175,7 @@ int main() {
 
 在x32dbg中分析，首先看到Createfile操作，然后检测文件内容长度（0xC通过校验），然后readfile，IDA中分析一下：
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../.gitbook/assets/image (100).png" alt=""><figcaption></figcaption></figure>
 
@@ -194,4 +194,106 @@ ACG The Best
 
 <figure><img src="../../.gitbook/assets/image (101).png" alt=""><figcaption></figcaption></figure>
 
-然后点击以后进行name和serial的输入
+然后点击以后进行name和serial的输入，下断点以后进行测试（name=aaaaa，serial=bbbbb）
+
+<figure><img src="../../.gitbook/assets/a85ae893ef5ed025bed94215b7756b9.png" alt=""><figcaption></figcaption></figure>
+
+可以看到有一个循环，`cmp bl,20`是循环出口（每次取name的一个字符，直至为结束字符0x20时退出）
+
+```wasm
+00401286    | mov bl,byte ptr ds:[edi]        | edi:"aaaaa"
+00401288    | cmp bl,20                       | 20:' '
+0040128B    | jb crcme1.401326                |
+00401291    | add eax,ebx                     |
+00401293    | inc edi                         | edi:"aaaaa"
+00401294    | cmp byte ptr ds:[edi],0         | edi:"aaaaa"
+00401297    | jne crcme1.401286               |
+```
+
+最终实现的时将所有字符加和到eax，然后执行下面的代码：
+
+```
+00401299    | rol eax,3
+0040129C    | xor eax,515A5 
+004012A1    | push eax
+```
+
+push eax以后读取输入的序列号，可以看到一开始的判断保证序列号必须是数字，接下来进行一个循环运算，最终跳出循环以后验证eax+ebx的值是否是0x797E7，根据这个逻辑可以编写注册机：
+
+<pre><code><strong>004012A8    | mov esi,crcme1.40212E           | esi:"bbbbbb", 40212E:"bbbbbb"
+</strong>004012AD    | mov eax,A                       | A:'\n'
+004012B2    | mov bl,byte ptr ds:[esi]        | esi:"bbbbbb" 读取serial
+004012B4    | test ebx,ebx                    |
+004012B6    | je crcme1.4012CD                |
+004012B8    | cmp bl,30                       | 30:'0'
+004012BB    | jb crcme1.401326                | 第一位大于等于0x30跳出
+004012BD    | cmp bl,39                       | 39:'9' 
+004012C0    | jg crcme1.401326                | 第一位小于等于0x39（‘9’）跳出
+004012C2    | sub ebx,30                      | 获取数值
+004012C5    | imul edi,eax                    | 乘10进位
+004012C8    | add edi,ebx                     | 
+004012CA    | inc esi                         |
+004012CB    | jmp crcme1.4012AD               | 继续循环
+004012CD    | xor edi,87CA                    |
+004012D3    | mov ebx,edi                     | 
+004012D5    | pop eax                         | 刚刚name运算的结果
+004012D6    | add eax,ebx                     | 条件：
+004012D8    | xor eax,797E7                   | ( name_key + (serial_value ^ 0x87CA) ) == 0x797E7
+
+004012DD    | test eax,eax                    | serial_value = name_key ^ 0x87CA
+004012DF    | jne crcme1.401326               
+</code></pre>
+
+```cpp
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+
+/* 32 位循环左移 */
+static uint32_t rol32(uint32_t v, unsigned int n) {
+    return (v << n) | (v >> (32 - n));
+}
+
+int main(void) {
+    char name[256];
+    printf("Enter name: ");
+    if (!fgets(name, sizeof(name), stdin)) {
+        return 1;
+    }
+    /* 去掉末尾换行 */
+    size_t len = strlen(name);
+    if (len > 0 && name[len-1] == '\n') {
+        name[--len] = '\0';
+    }
+
+    /* 1. 计算 name_key */
+    uint32_t eax = 0;
+    for (size_t i = 0; i < len; i++) {
+        unsigned char c = name[i];
+        if (c < 0x20) {
+            fprintf(stderr, "Error: invalid character 0x%02X in name\n", c);
+            return 1;
+        }
+        eax += c;
+    }
+    eax = rol32(eax, 3);
+    uint32_t name_key = eax ^ 0x515A5;
+
+    /* 2. 计算 serial_value */
+    uint32_t temp = 0x797E7 - name_key;
+    uint32_t serial_value = temp ^ 0x87CA;
+
+    /* 3. 输出十进制序列号 */
+    printf("Generated serial: %u\n", serial_value);
+    return 0;
+}
+
+```
+
+<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+
+
+
+
+
