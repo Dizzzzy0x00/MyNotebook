@@ -22,7 +22,8 @@
 
 ## vulnerability detection
 
-* [JavaScript](vulnerability-detection/javascript.md)
+* [JavaScript](vulnerability-detection/javascript/README.md)
+  * [Java Reflection](vulnerability-detection/javascript/java-reflection.md)
 * [Python Code](vulnerability-detection/python-code/README.md)
   * [Py Vulnerability Detection1-Paper Reproduction](vulnerability-detection/python-code/py-vulnerability-detection1-paper-reproduction.md)
 * [BCSD](vulnerability-detection/bcsd/README.md)
