@@ -300,3 +300,213 @@ int main(void) {
 ## 016-fty-crkme3
 
 压缩包里面含三个文件，两个exe和一个nfo文件（NFO文件是“Information”的缩写，扩展名为`.nfo`，主要用于存储与数字媒体相关的元数据。常见于电影、音乐、游戏或软件发布包中，记录如版本号、文件大小、制作团队、版权声明等信息）
+
+尝试运行一下：
+
+<figure><img src="../../.gitbook/assets/image (102).png" alt=""><figcaption></figcaption></figure>
+
+根据提示，需要输入正确的calc计算结果（根据文件名猜另外一个unpacked.exe应该是没有加壳的版本，运行以后是一样的输入界面和结果）使用工具查一下壳，可以看到是UPX 0.89壳：
+
+<figure><img src="../../.gitbook/assets/6fb5ae5a6753b46d631238c1e40124b.png" alt=""><figcaption></figcaption></figure>
+
+使用工具脱壳：
+
+<figure><img src="../../.gitbook/assets/beb56b5b40616f8670de37fbe74c795.png" alt=""><figcaption></figcaption></figure>
+
+使用IDA进行一下静态分析，查找字符串并定位到交叉引用的地方：
+
+<figure><img src="../../.gitbook/assets/c152a591383c91e61fb8dbd24488eeb.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/670407d171b1a3c4c897e627b206065 (1).png" alt=""><figcaption></figcaption></figure>
+
+可以看到成功的校验逻辑分支是
+
+```
+        if ( v72 != sub_444B20(v98, 9) + v96 )
+        {
+LABEL_23:
+          Dialogs::ShowMessage((Dialogs *)&str_Nope__Your_calc[1], v3); //失败弹窗
+          goto LABEL_25;
+        }
+      }
+    }
+    Dialogs::ShowMessage((Dialogs *)&str_Good_boy__Now_f[1], v3);//成功弹窗
+    goto LABEL_25;
+```
+
+所以目标是让`v72 = sub_444B20(v98, 9) + v96` ，需要继续看v72、v98、v96这几个变量是怎么从输入计算得到的和`sub_444B20函数` 是什么功能
+
+从函数一开始的输入开始分析，要求用户输入字符串长度为 9，且第3位和第7位是 ‘-’，其余部分是数字形如AA-BBB-CC（ascii码要求除了45就要再0x30-0x39），
+
+<figure><img src="../../.gitbook/assets/f44a17cdebe8242b266b91cdca81572.png" alt=""><figcaption></figcaption></figure>
+
+然后接下来的代码依次提取了input\[1]、input\[3]、input\[4]....input\[8],也就是除去了要求的 ‘-’：
+
+```
+
+    setstr(v137, &v138);
+    v136 = input[1];
+    v135 = 1;
+    LOBYTE(v6) = 2;
+    System::__linkproc__ PStrNCat(v137, &v135, v6);
+    setstr(v134, v137);
+    v136 = input[3];
+    v135 = 1;
+    LOBYTE(v7) = 3;
+    System::__linkproc__ PStrNCat(v134, &v135, v7);
+    setstr(v133, v134);
+    v136 = input[4];
+    v135 = 1;
+    LOBYTE(v8) = 4;
+    System::__linkproc__ PStrNCat(v133, &v135, v8);
+    setstr(v132, v133);
+    v136 = input[5];
+    v135 = 1;
+    LOBYTE(v9) = 5;
+    System::__linkproc__ PStrNCat(v132, &v135, v9);
+    setstr(v131, v132);
+    v136 = input[7];
+    v135 = 1;
+    LOBYTE(v10) = 6;
+    System::__linkproc__ PStrNCat(v131, &v135, v10);
+    setstr(v130, v131);
+    v136 = input[8];
+    v135 = 1;
+    LOBYTE(v11) = 7;
+    System::__linkproc__ PStrNCat(v130, &v135, v11);
+
+```
+
+取值操作，将取到的数字拼接到变量v136得到一个输入的7位数，这里在动态调试里面进行验证，定位字符串并下断点（尝试输入12-345-67）：
+
+<figure><img src="../../.gitbook/assets/e9370ec386e0baea52060a7a9ca8090.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/2677a25568e7cd51888e22583937d29.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/19893b50d012dac2dc04837edd86ea3.png" alt=""><figcaption></figcaption></figure>
+
+根据IDA定位到0x444CE0处.看到此时EAX+1处值为123456：
+
+<figure><img src="../../.gitbook/assets/572cafa4920d795d924879a10068e39.png" alt=""><figcaption></figcaption></figure>
+
+接下来看这一段，这一段取了我们刚刚处理得到后的值的每一位进行运算，关键的运算函数是sub\_444B20(num,8)，并将结果累加：
+
+```c
+  v5 = 8;                                                                              
+  v41 = input;                                                                         
+  LOBYTE(v41) = *input;                                                                
+  LStrFromPCharLen(&v120, v41);                                                        
+  v42 = Sysutils::StrToInt(v120);                                                      
+  v43 = sub_444B20(v42, 8);                                                            
+  v44 = input;                                                                         
+  LOBYTE(v44) = input[1];                                                              
+  LStrFromPCharLen(&v119, v44);                                                        
+  v45 = Sysutils::StrToInt(v119);                                                      
+  v46 = sub_444B20(v45, 8) + v43;                                                      
+  v47 = input;                                                                         
+  LOBYTE(v47) = input[3];                                                              
+  LStrFromPCharLen(&v118, v47);                                                        
+  v48 = Sysutils::StrToInt(v118);                                                      
+  v49 = sub_444B20(v48, 8) + v46;                                                      
+  v50 = input;                                                                         
+  LOBYTE(v50) = input[4];                                                              
+  LStrFromPCharLen(&v117, v50);                                                        
+  v51 = Sysutils::StrToInt(v117);                                                      
+  v52 = sub_444B20(v51, 8) + v49;                                                      
+  v53 = input;                                                                         
+  LOBYTE(v53) = input[5];                                                              
+  LStrFromPCharLen(&v116, v53);                                                        
+  v54 = Sysutils::StrToInt(v116);                                                      
+  v55 = sub_444B20(v54, 8) + v52;                                                      
+  v56 = input;                                                                         
+  LOBYTE(v56) = input[7];                                                              
+  LStrFromPCharLen(&v115, v56);                                                        
+  v57 = Sysutils::StrToInt(v115);                                                      
+  v58 = sub_444B20(v57, 8) + v55;                                                      
+  v59 = input;                                                                         
+  LOBYTE(v59) = input[8];                                                              
+  LStrFromPCharLen(&v114, v59);                                                        
+  v60 = Sysutils::StrToInt(v114);                                                      
+  v61 = sub_444B20(v60, 8) + v58;                                                      
+  v62 = input;                                                                         
+  LOBYTE(v62) = input[9];                                                              
+  LStrFromPCharLen(&v113, v62);                                                        
+```
+
+分析一下sub\_444B20函数，发现是一个简单的幂函数，计算数字arg\[1]的（arg\[2]-1）次方
+
+```c
+int __fastcall sub_444B20(int result, int a2)
+{
+  int v2; // ecx
+  bool v3; // cc
+  int v4; // edx
+  int v5; // edx
+  //a2=8
+  v2 = result;//记录原始乘方底数
+  v3 = a2 < 2; //v3 = false
+  v4 = a2 - 2; // v4 = 6
+  if ( !v3 )
+  {
+    v5 = v4 + 1; //v5 = 7
+    do
+    {
+      result *= v2; //乘方
+      --v5;
+    }
+    while ( v5 );
+  }
+  return result;
+}
+```
+
+if条件要求最后累加以后的值是自己本身（经典水仙花数），
+
+* **输入格式**：形如 `"12-345-67"`
+*   **规则**：将所有 `-` 去除，得到一个长度为7的字符串 `D`，只要： $$\text{int}(D[0])^7 + \text{int}(D[1])^7 + \cdots + \text{int}(D[6])^7 = \text{int}(D)$$
+
+
+
+那么编写注册机遍历寻找满足的值：
+
+```python
+def is_valid_serial(num_str):
+    """判断一个7字符数字字符串是否是有效序列号：每位数字的7次方之和等于其整数值"""
+    total = sum(int(d) ** 7 for d in num_str)
+    return total == int(num_str)
+
+def find_valid_serials():
+    """查找所有满足条件的7位（包含前导0）合法序列号"""
+    valid_serials = []
+    for i in range(0, 10**7):  # 遍历0000000 到 9999999
+        num_str = f"{i:07d}"  # 保证保留前导0，长度为7
+        if is_valid_serial(num_str):
+            valid_serials.append(num_str)
+    return valid_serials
+
+def format_serial(serial):
+    """格式化为 xx-xxx-xx 的序列号"""
+    return f"{serial[:2]}-{serial[2:5]}-{serial[5:]}"
+
+if __name__ == "__main__":
+    serials = find_valid_serials()
+    for s in serials:
+        print(format_serial(s))
+
+```
+
+<figure><img src="../../.gitbook/assets/234553e2263708c3d3f9b033f514bb6.png" alt=""><figcaption></figcaption></figure>
+
+验证，所有的序列号都输入正确：
+
+<figure><img src="../../.gitbook/assets/9707314fe2b9ba21943b7ca01e270f5.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../../.gitbook/assets/2a474d80f27934bb2901e0b99647ba3 (1).png" alt=""><figcaption></figcaption></figure>
+
+
+
+<figure><img src="../../.gitbook/assets/74f508a464e1819615564d2c0deba54.png" alt=""><figcaption></figcaption></figure>
+
+
+
+<figure><img src="../../.gitbook/assets/b36730d7d6a33fc2c82c6413c2edc74.png" alt=""><figcaption></figcaption></figure>
