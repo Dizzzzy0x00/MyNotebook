@@ -2,20 +2,6 @@
 description: CTF中常见编码特征总结
 cover: ../.gitbook/assets/101012194_p0_master1200.jpg
 coverY: 126.72933549432739
-layout:
-  cover:
-    visible: true
-    size: full
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
 ---
 
 # CTF Encode Summary

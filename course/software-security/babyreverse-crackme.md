@@ -1,9 +1,10 @@
 ---
+description: CrackMe160
 cover: ../../.gitbook/assets/微信图片_20250408134702.jpg
 coverY: 135
 ---
 
-# BabyReverse-CrackMe160
+# BabyReverse-CrackMe
 
 ## 003-Cruehead-CrackMe3
 

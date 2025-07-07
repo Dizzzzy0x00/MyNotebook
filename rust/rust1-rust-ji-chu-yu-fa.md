@@ -2,20 +2,6 @@
 description: 由于一些原因开始学习Rust，发现这个语言很有意思，于是打算开个笔记记录一下，哈哈就是一直在开坑的路上
 cover: ../.gitbook/assets/01.jpg
 coverY: 0
-layout:
-  cover:
-    visible: true
-    size: full
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
 ---
 
 # Rust-1 Rust基础语法
