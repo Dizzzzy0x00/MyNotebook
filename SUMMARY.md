@@ -33,6 +33,7 @@
   * [BCSD1-Algorithm1——CFG](vulnerability-detection/bcsd/bcsd1-algorithm1-cfg.md)
   * [BCSD2-Graph in BCSD](vulnerability-detection/bcsd/bcsd2-graph-in-bcsd.md)
   * [BCSD3-LLMs](vulnerability-detection/bcsd/bcsd3-llms.md)
+* [Wechat Mini Program](vulnerability-detection/wechat-mini-program.md)
 
 ## Fuzz
 
