@@ -47,6 +47,7 @@
 * [Fuzzing for software vulnerability discovery](fuzz/fuzzing-for-software-vulnerability-discovery.md)
 * [Fuzzing 101](fuzz/fuzzing-101.md)
 * [LibAFL-Learn](fuzz/libafl-learn.md)
+* [iot Fuzz](fuzz/iot-fuzz.md)
 
 ## AI-Attack
 
