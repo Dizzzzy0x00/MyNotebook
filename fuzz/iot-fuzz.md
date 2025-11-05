@@ -19,7 +19,7 @@ layout:
 
 ## 背景
 
-### （1）协议模糊测试
+### 协议模糊测试
 
 协议测试的核心挑战源于其 “状态依赖性” 与 “语法语义约束”
 
@@ -38,7 +38,7 @@ layout:
 
 {% embed url="https://github.com/aflnet/aflnet" %}
 
-### （2）固件模糊测试
+### 固件模糊测试
 
 **挑战：**&#x9ED1;盒性 + 环境依赖性 + 异构性
 
@@ -144,3 +144,34 @@ FirmColic 通过符号执行（Concolic Execution）自动提取 “能覆盖深
 论文提出一种技术——仲裁模拟，这个技术的核心是不严格遵循固件原始执行流程，核心思路是 “保证高层行为可用” 即可开展动态分析，无需定位和修复仿真失败的精确根源。**核心概念：仲裁点（Arbitration Point），**&#x662F; “**仿真流程中易发生失败、需注入干预操作的关键节点**”，需通过分析失败案例归纳得出
 
 <figure><img src="../.gitbook/assets/3e0bf663fe5e2d291c68f3c859039371.png" alt=""><figcaption></figcaption></figure>
+
+### 源码阅读
+
+工具使用：
+
+```bash
+##安装
+git clone --recursive https://github.com/pr0v3rbs/FirmAE
+./download.sh
+./install.sh
+
+##初始化
+./init.sh
+##准备一个固件（FirmAE项目给的测试案例）
+cd firmwares
+wget https://github.com/pr0v3rbs/FirmAE/releases/download/v1.0/DIR-868L_fw_revB_2-05b02_eu_multi_20161117.zip
+
+##注意需要安装比较老版本的binwalk，可以安装FirmAE自带的推荐的binwalk
+cd ./binwalk-2.3.4/
+sudo python3 setup.py install
+
+
+##测试
+##-c check模式  
+##这个模式检查固件是否可以仿真，会给出仿真成功后可以访问web页面的ip,或是仿真失败给出仿真失败的原因比如固件提取失败、网络构建失败、服务启动失败等
+sudo ./run.sh -c dlink firmwares/DIR-868L_fw_revB_2-05b02_eu_multi_20161117.zip
+##-a模式
+sudo ./run.sh -a dlink firmwares/DIR-868L_fw_revB_2-05b02_eu_multi_20161117.zip
+```
+
+<figure><img src="../.gitbook/assets/3909abc0b6bbdaf5fde04edde59036fe.png" alt=""><figcaption><p>-c check模式，IID是1，相关日志在FirmAE/scratch/<strong>1</strong></p></figcaption></figure>
