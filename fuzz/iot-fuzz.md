@@ -175,3 +175,66 @@ sudo ./run.sh -a dlink firmwares/DIR-868L_fw_revB_2-05b02_eu_multi_20161117.zip
 ```
 
 <figure><img src="../.gitbook/assets/3909abc0b6bbdaf5fde04edde59036fe.png" alt=""><figcaption><p>-c check模式，IID是1，相关日志在FirmAE/scratch/<strong>1</strong></p></figcaption></figure>
+
+## HouseFuzz
+
+{% embed url="https://ieeexplore.ieee.org/document/11023421" %}
+
+[source code comming soon.....](https://github.com/HouseFuzz/HouseFuzz)
+
+{% embed url="https://hub.docker.com/r/kenshin123/housefuzz" %}
+
+
+
+### Introduction 背景
+
+论文研究方向：Linux 固件漏洞检测
+
+Linux固件服务普遍依赖**多进程协作**实现复杂功能（如处理网络请求、系统配置）。论文将参与服务的进程按 “生命周期” 和 “访问方式” 分为三类：
+
+* **长进程（Long-running Processes）**：持续运行以提供持久服务通道，又细分为 “网络面向进程”（可远程访问，如 HTTP 服务器的`httpd`进程）和 “守护进程”（仅本地访问，如处理系统配置的`nvramd`进程）；
+* **工具进程（Utility Processes）**：由长进程临时调用，处理短期任务（如单条网络请求的解析），任务完成后终止；
+* 三类进程通过**进程间通信（IPC）** 协作（如 socket、管道），一个 “服务” 即指所有协作完成某一通信通道服务的进程集合。
+
+论文拆解固件网络服务的协议构成，指出 “标准协议 + 定制化协议” 的混合模式。
+
+* **标准服务协议（Standard Service Protocol）**：有官方文档定义的通用协议（如 HTTP、UPnP、Telnet），厂商会遵循公开规范实现基础功能。例如，HTTP 协议通过 TCP 80 端口通信，UPnP 用于设备发现，现有模糊测试工具（如 GREENHOUSE）通常基于这些标准协议的模板（如 HTTP 请求格式）制作初始测试种子，以保证用例的语法正确性。
+* **定制化服务协议（Customized Service Protocol）**：厂商为实现产品特有功能，在标准协议基础上进行**应用层修改**，会引入两大关键特征：
+  1. **Token**：即自定义的具体数据。
+  2. **Token之间的严格语义约束**：Token间存在依赖关系。
+
+Linux 固件支撑 43% 的 IoT 设备，但网络服务漏洞易引发远程代码执行、拒绝服务等攻击。现有灰盒模糊测试存在三大关键局限，且在实际场景中影响显著：
+
+*   **仿真难题**：Linux 固件服务并非单进程独立运行，而是依赖**多进程协作**—— 不仅包括直接对外提供网络服务的 “网络面向进程”（如 HTTP 服务器进程），还包括通过**进程间通信（IPC）** 触发的关联进程（如处理 IPC 请求的守护进程、临时任务的工具进程）。因此，要实现对固件服务的 “整体仿真”，前提是全面识别所有与网络服务相关的进程。
+
+    现有方案分为 “系统级仿真” 和 “进程级仿真”，但均因设计问题无法完整识别进程：
+
+    * **系统级仿真方案**：原理是模拟整个 Linux 系统（包括 OS 内核、所有初始化进程），通过 “公共网络通道”（如 TCP 端口）识别网络面向进程。但这类方案极易因 “仿真障碍”（如网络设备配置错误、NVRAM 存储异常）导致仿真中断，网络通道无法正常建立，进而漏检本应通过端口识别的网络面向进程。
+    * **进程级仿真方案**：原理是通过 “进程名白名单” 筛选并仿真目标进程（仅模拟用户态进程，规避内核仿真开销）。但 “白名单启发式” 存在天然缺陷 —— 无法覆盖厂商自定义命名的进程（如特定守护进程），导致进程识别的 “召回率” 极低（即大量真实相关进程被漏检）。
+* **反馈引导单一**：现有的灰盒固件模糊测试工具通常将多进程运行时特性过度简化为单进程运行时特性，仅收集网络面向进程的覆盖信息，无法触发需多进程协作的漏洞（如通过 IPC 通信触发的缓冲区溢出）。
+* **测试用例无效性高**：定制化协议存在严格语义约束（如键值对依赖、路径关联），基于标准协议的随机变异难以绕过输入验证。
+
+针对这些问题，HouseFuzz通过三大技术模块解决上述痛点，整体流程为 **“服务仿真→多进程模糊测试→协议引导用例生成”**
+
+
+
+### Challenges and Insights
+
+论文从一个**基于 Linux 的固件中存在的缓冲区溢出漏洞**出发分析
+
+<figure><img src="../.gitbook/assets/563bea535219563f530ed6da0392da41.png" alt=""><figcaption></figcaption></figure>
+
+该漏洞需按固定顺序执行四步，少一步或不满足约束均无法触发，具体流程如下：
+
+1. 服务初始化：系统启动时，`ncc`进程（守护进程）自动调用`mini_httpd`进程（网络面向进程），`mini_httpd`绑定网络通道（如 TCP 80 端口）并等待外部 HTTP 请求
+2. **发送恶意请求：**&#x653B;击者发送恶意数据包以激&#x6D3B;_&#x6D;ini\_http&#x64;_&#x8FDB;程，请求需包含定制化参数（如`POST /get_set.cpp HTTP/1.1`，参数含`ccp_act=set&nextPage=back.htm&pc_ip=<超长字符串>`）
+3. **请求转发：**`mini_httpd`解析请求后，通过`handle_request()`函数检查路径后缀 —— 发现请求路径后缀为`.ccp`（符合定制化协议规则），便将请求数据封装为 IPC 消息，通过 socket 转发给`ncc`进程
+4. **漏洞触发：**`ncc`进程接收 IPC 请求后，调用`ipc_handler()`函数处理：
+   1. 先通过`get_set_callback()`函数提取参数，验证`ccp_act=set`和`nextPage=back.htm`（满足定制化语义约束）；
+   2. 提取`pc_ip`字段的超长字符串，用`sprintf()`函数将其格式化到固定大小（0x100 字节）的`buf`数组中，且未做长度检查 —— 最终导致缓冲区溢出，触发漏洞
+
+从这个案例出发可以验证之前说的三个挑战：服务识别（ncc进程和mini\_httpd进程都要被识别）、多进程模糊测试的挑战（仅将面向网络的进程mini\_httpd作为模糊测试目标则无法发现ncc的崩溃异常）、处理定制化服务协议的挑战（为了通过 nc&#x63;_&#x6D41;&#x7A0B;_&#x4E2D;的验证，_“ccp\_act”_&#x548C;_“set”_&#x5FC5;须组合成语义有效的键值对）
+
+### Overview of HOUSEFUZZ
+
+<figure><img src="../.gitbook/assets/4763a5ce590aa9061c6a938a94ead6cb.png" alt=""><figcaption></figcaption></figure>
