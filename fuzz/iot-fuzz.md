@@ -184,8 +184,6 @@ sudo ./run.sh -a dlink firmwares/DIR-868L_fw_revB_2-05b02_eu_multi_20161117.zip
 
 {% embed url="https://hub.docker.com/r/kenshin123/housefuzz" %}
 
-
-
 ### Introduction 背景
 
 论文研究方向：Linux 固件漏洞检测
@@ -274,3 +272,62 @@ Linux 固件支撑 43% 的 IoT 设备，但网络服务漏洞易引发远程代�
 Linux 进程的 IPC 通道由特定的“键”唯一标识，例如套接字文件路径。通过同一通道进行的 IPC 通信表明进程间存在依赖关系。
 {% endhint %}
 
+当上述识别完成后，HOUSEFUZZ 就能自动化地：
+
+1. 启动守护进程daemon progress；
+2. 再启动网络进程network-facing progress；
+3. 用 QEMU对execve() 插桩，跟踪被测服务启动的所有进程，从而进行覆盖率收集和漏洞检测
+
+
+
+### Multi-Process Fuzzing Framework
+
+1.  测试用例终（TCE）止检测
+
+    多进程模糊测试则需要检测所有服务进程是否已完成测试用例的处理。否则，模糊测试很可能收集到不完整的覆盖率，某些服务进程仍在处理测试用例，导致新的覆盖率被忽略。HOUSEFUZZ 将所有进程的测试完成事件 (TCE) 都已观察到视为测试用例已完成执行。
+
+    1. **工具进程**：这种进程生命周期很短，是专门为处理单个请求而启动的，这类似于单进程灰盒模糊测试中的 PUT 请求，所以将这类进程的终止作为其测试用例终止 (TCE)
+    2. 网络进程：这种进程通常会在处理完请求后释放网络资源。当 HOUSEFUZZ 检测到网络资源（即模糊测试中的网络套接字）被释放（即关闭）时，它也认为该进程的 TCE 已满足
+    3. 守护进程：这种进程主要处理进程间通信 (IPC)。在处理完 IPC 通信后，守护进程可能会重用 IPC 通道而不是将其关闭，但守护进程会通过调用特定的 I/O 监听系统调用（例如 select、poll）反复等待进程间通信 (IPC) 请求，并在这些系统调用返回后开始处理请求。HOUSEFUZZ 对 I/O 监听系统调用进行插桩，当发现守护进程再次调用 I/O 监听系统调用认为该进程的 TCE 已满足
+
+    <figure><img src="../.gitbook/assets/b46f93ded3aa4ca4f521e7125a8cfe23.png" alt=""><figcaption></figcaption></figure>
+
+
+2.  覆盖率
+
+    为了在不发生数据竞争的情况下记录每个进程的覆盖率，HOUSEFUZZ 会在每个进程启动时为其分配一个隔离的共享内存作为覆盖率位图；在覆盖率指导使用完毕后，所有位图都会被清除并放入共享内存池中，以供下一轮测试使用。若多个进程加载**相同的可执行 ELF**（例如多进程 fork/exec 同一二进制），则在 TCE 后**把这些进程的位图合并到同一个 bitmap**（通过对 hit counter 求和），保证不同 run 中的比较是按“程序”而不是按进程实例进行的一致比较。只有当守护进程被“触发”时才开始收集其覆盖；没有被触发的守护进程跳过收集，减小内存与统计开销。
+
+    不同测试中启动的进程可能不同（例如，启动不同的程序或使用不同的启动顺序），HOUSEFUZZ 必须确保进程覆盖率比较的一致性——比较的覆盖率数据对应于同一个程序。为了解决这个问题，HOUSEFUZZ 会整合加载同一可执行 ELF 对象的所有进程的覆盖率位图（通过对命中次数求和）。
+3.  多进程漏洞检测
+
+    HOUSEFUZZ能够检测所有服务进程中的漏洞，包括面向网络的进程、守护进程和实用程序进程。具体而言，实现了内存损坏和命令注入漏洞的漏洞检测
+
+    1. 内存损坏 memory corruptions
+       * 核心是**捕获进程的 crash signals**（例如segmentation fault），若任意进程 crash，就记录为一个崩溃事件
+       * 但论文注意到：**utility 进程里有些崩溃只是“不可利用的 bug”，**&#x56E0;此他们做了**二次验证**：对导致崩溃的 PoC 做 bit-flip（变异）测试 —— 如果变异能引起不同的崩溃影响（例如从 NULL 改为访问其它指针），说明该崩溃受输入控制，判为“真实可利用的漏洞”；否则当作普通 bug 过滤。该方法在论文中被认为开销可接受
+    2. 命令注入检测 command injection
+       * 采用了基于Web应用程序的方法来检测固件二进制文件中的漏洞，该方法会对所有服务进程的execve()系统调用进行插桩
+
+### Service-Protocol-Guided Fuzzing
+
+协议标准化：技术路线： **Context-Free Grammar（CFG）** + **Token Dependency Graph (TDG)**
+
+{% embed url="https://www.geeksforgeeks.org/theory-of-computation/what-is-context-free-grammar/" %}
+
+标准服务协议（syntax）对应CFG，定制协议（customized protocol）对应TDG
+
+* TDG 的节点 n = (v, t)：v 是具体 token 字符串（如 `"set"`、`"ccp_act"`、`"/get_set.cpp"`），t 是 token 类型（论文定义了三类基本类型：`Path, Key, Value`）
+* 有向边 e(ni, nj) 表示当在测试用例中使用 nj 时，**还需要**将 ni 插入才能满足语义依赖（比如 Value → Key，或控制流依赖）
+
+标准协议识别：依据 **网络通道（端口）** 和 **字符串魔数（magic constants）** 来判定（例如端口 80 映射 HTTP；或二进制里出现 `"SUBSCRIBE"` 可判 UPnP）。这是一个轻量且常用的启发式方法
+
+定制协议（TDG）推断：采用online + offline的模式，在线阶段在运行时对**字符串比较函数**（例如 `strcmp()`）做插桩，收集被比较的常量提取出 token 值。离线阶段使用静态分析，从二进制中提取可能的 `Path`/`Key` token。通过**控制流分析**（识别直接的 control-flow 依赖）和**数据流/到达定义分析**（识别 data-flow 依赖）来推断依赖边，这一部分和已有的工具一致。
+
+<figure><img src="../.gitbook/assets/103e11ac65daf0bb4ced5e2f7088e6e9.png" alt=""><figcaption></figcaption></figure>
+
+**用 TDG 与 CFG 指导测试用例生成，**
+
+* **先用 CFG（标准协议）生成语法合法的基础 test case**（例如根据 HTTP 的 CFG 生成 GET/POST 格式、参数位置等）。CFG 负责语法级别的 correctness。
+* **在 CFG 生成的 test case 上“插 token”来满足 TDG 的语义依赖**：
+  * 随机挑选 TDG 中的 token n(v,t)，在 test case 中找到一个具有相同类型 t 的位置（比如某个 parameter 的 value），把它替换成 v（把 `"AAA"` 替换为 `"set"`）。
+  * 然后**逆向遍历 TDG，**&#x628A;这些依赖 token 也插入到 test case 的合适位置，尽量满足链式依赖。
