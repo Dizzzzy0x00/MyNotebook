@@ -331,3 +331,67 @@ Linux 进程的 IPC 通道由特定的“键”唯一标识，例如套接字文
 * **在 CFG 生成的 test case 上“插 token”来满足 TDG 的语义依赖**：
   * 随机挑选 TDG 中的 token n(v,t)，在 test case 中找到一个具有相同类型 t 的位置（比如某个 parameter 的 value），把它替换成 v（把 `"AAA"` 替换为 `"set"`）。
   * 然后**逆向遍历 TDG，**&#x628A;这些依赖 token 也插入到 test case 的合适位置，尽量满足链式依赖。
+
+
+
+### Evaluation 实验评估
+
+#### DataSet&#x20;
+
+作者参考最近的SoTA中使用的benchmark，包含来自3家厂商的70个固件镜像，用相同产品的最新版本镜像更新了数据集中的35个镜像，保留Binwalk提取成功的部分，最终数据集使用了剩余的60个可提取的固件镜像
+
+<figure><img src="../.gitbook/assets/2b1d8aa1c5ec38d1ddd0b594a011a935.png" alt=""><figcaption></figcaption></figure>
+
+#### General Fuzzing Performance (RQ1)
+
+基线：GREENHOUSE（备选基线还有EQUAFL和Firm-AFL，现有评估表明GREENHOUSE比EQUAFL快2倍，EQUAFL比Firm-AFL快14倍）
+
+数据集：基于现有固件镜像数据集中提取的 60 个固件镜像，我们首先运行 GREENHOUSE 来收集其中所有可模拟和可进行模糊测试的服务，共包含 41 个 Web 服务，作为模糊测试的固件数据集，对于每个工具，对每个服务运行 3 轮模糊测试，每轮使用 1 个 CPU 核心，持续 24 小时。两个工具都使用 GREENHOUSE 提供的相同初始种子
+
+<figure><img src="../.gitbook/assets/817c99515eaceb5d9d1450d556138292.png" alt=""><figcaption></figcaption></figure>
+
+* 评估代码覆盖率时，仅考虑了面向网络程序的边缘覆盖率，因为 GREENHOUSE 不具备像 HOUSEFUZZ 那样收集多进程覆盖率的能力
+* 开销方面，由于多进程反馈收集和 TDG 推理，HOUSEFUZZ 在 41 项服务上的平均时间开销是 GREENHOUSE 的 6.8 倍。内存开销方面，HOUSEFUZZ 为每个活动进程分配了一个 128 KB 的覆盖率位图，内存开销与活动进程数呈线性关系。作者认为这种开销是完全可以接受的，因为 HOUSEFUZZ 在漏洞检测和代码覆盖率方面明显优于 GREENHOUSE
+
+#### 漏洞挖掘实验
+
+鉴于先前对比实验使用的固件镜像数据集仅包含 2019 年之前发布的旧版固件，本实验旨在证明 HOUSEFUZZ 也能检测出仍在维护的产品最新固件镜像中的漏洞，使用 HOUSEFUZZ 对每个已识别的 Web 服务进行了 24 小时的模糊测试，成功检测到 5 个服务中的 21 个0-day漏洞，获得 21 个 CVE/CNVD 编号
+
+<figure><img src="../.gitbook/assets/f363dda96854902cfeab8614fb34481d.png" alt=""><figcaption></figcaption></figure>
+
+#### Experiments on Service Identification (RQ2)
+
+RQ1只对比了HOUSEFUZZ和GREENHOUSE均可模拟的固件服务，RQ2则验证提出的服务识别方法的有效性，是否能识别出那些被忽略的、存在潜在漏洞的服务
+
+基线：FirmAE和GREENHOUSE
+
+GREENHOUSE 使用进程名称白名单来识别面向网络的程序和守护进程。FirmAE 模拟整个固件系统，而不进行服务识别。为了与 FirmAE 进行比较，在模拟过程中运行了 netstat 工具来识别面向网络的进程，这类似于运行 HOUSEFUZZ 而不修补模拟异常代码。
+
+<figure><img src="../.gitbook/assets/7f4fb6a98a352b2008d6cfc253a25cce.png" alt=""><figcaption></figcaption></figure>
+
+#### Experiments on Multi-Process Fuzzing Framework (RQ3)
+
+主要是三个实验
+
+* 一项消融实验，以评估多进程模糊测试框架的整体有效性
+  * 两种消融设置：GREENHOUSE 作为基础基线，仅执行单进程模糊测试；而 HOUSEMP 通过集成多进程模糊测试框架扩展了 GREENHOUSE 的功能
+  * HOUSEMP 总共比 GREENHOUSE 少发现了 7 个漏洞，这主要是由于多进程反馈收集的开销造成的。尽管如此，HOUSEMP 在 16 个目标服务中实现了比 GREENHOUSE 显著更高的代码覆盖率，并检测到了 GREENHOUSE 未检测到的 14 个漏洞
+* 一项人工漏洞分析，以验证多进程模糊测试框架是否确实有助于多进程漏洞的检测
+  * 手动分析了RQ1中HOUSEFUZZ检测到的漏洞，为了检测多进程漏洞，模糊测试必须同时触发一个进程中的进程间通信（IPC）和另一个进程中的易受攻击代码，这需要来自两个进程的反馈。由于反馈收集范围有限，单进程模糊测试很难检测到此类漏洞。在RQ1和漏洞挖掘实验中，分别识别出的128个漏洞中有3个是多进程漏洞，21个漏洞中有15个是多进程漏洞。这些漏洞已被分配了17个CVE/CNVD编号，占所有45个已分配CVE/CNVD编号的38%。该结果表明，多进程模糊测试框架能够有效地检测真实的多进程漏洞。
+* 评估多进程模糊测试框架使用的 TCE 检测方法是否足够稳健，是否能够实现一致的代码覆盖率收集
+  * 从覆盖率收集稳定性的角度来验证TCE检测的稳定性。具体而言，使用之前实验中HOUSEFUZZ生成的队列种子作为测试用例数据集，并对每个种子重复执行N次（N=20），所有种子执行均在一致的运行环境下进行，并使用恒定的随机数设备（例如 /dev/random）。如果同一测试用例的所有执行都产生了一致的多进程代码覆盖率，则表明该种子的TCE检测是稳定的。
+  * 评估了 13,453 个种子，其中 8,746 个（65%）种子的执行结果具有一致的代码覆盖率。这些种子在单进程模糊测试模式下被认为是稳定的，因此被用于评估 TCE 检测在多进程模糊测试模式下的稳定性。在这 8,746 个种子中，有 358 个种子在多进程模糊测试模式下执行时产生了不一致的代码覆盖率。作者发现这是由于 select() 系统调用在处理多个 IPC I/O 事件时出现 NCL 问题造成的。
+
+<figure><img src="../.gitbook/assets/0e540e131bd1764944443507766471b7.png" alt=""><figcaption></figcaption></figure>
+
+#### Experiments on Service-Protocol-Guided Fuzzing (RQ4)
+
+进行了两项实验，以验证 HOUSEFUZZ 服务协议引导模糊测试的有效性：一项消融实验，用于评估服务协议引导模糊测试的整​​体有效性；以及一项基于人工分析的研究，用于评估 TDG 推理的有效性。
+
+消融实验的变体：
+
+* HOUSECFG 引入了基于控制流图 (CFG) 的标准服务协议引导的测试用例生成方法，仅利用提取的令牌生成测试用例，而不包含自定义服务协议。
+* HOUSETDGOL 是 HOUSEFUZZ 的一个变体，它排除了offline TDG推理组件。
+
+<figure><img src="../.gitbook/assets/3efe570116ca6f601edec7bcb42f1012.png" alt=""><figcaption></figcaption></figure>
+
