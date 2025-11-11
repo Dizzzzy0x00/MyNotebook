@@ -129,6 +129,8 @@ FirmColic 通过符号执行（Concolic Execution）自动提取 “能覆盖深
 
 <table><thead><tr><th width="133">工具</th><th width="145.66668701171875">类型</th><th>核心能力</th><th>适用场景</th></tr></thead><tbody><tr><td>QEMU</td><td>通用模拟器</td><td>同时支持用户级与系统级仿真，可模拟多架构（ARM、MIPS 等），支持硬件加速（如 Intel VT-x）</td><td>快速验证单一程序或构建基础仿真环境</td></tr><tr><td>Firmadyne</td><td>系统级框架</td><td>自动化固件提取、仿真与分析，支持 NVRAM 模拟，针对 Linux-based 物联网固件</td><td>大规模固件批量仿真（如路由器、摄像头）</td></tr><tr><td>FirmAE</td><td>系统级框架</td><td>基于 Firmadyne 优化，新增 “仲裁仿真”（解决环境差异），支持自动化与并行化</td><td>高成功率的大规模固件动态分析</td></tr><tr><td>Avatar2</td><td>混合仿真工具</td><td>结合仿真与硬件调试（如 JTAG），将外设访问转发给真实硬件，提升保真度</td><td>需高精度硬件交互的固件分析</td></tr><tr><td>HALucinator</td><td>高级仿真工具</td><td>基于 HAL（硬件抽象层）拦截函数，无需模拟底层 MMIO，支持跨设备扩展（如 NXP 不同系列芯片）</td><td>ARM Cortex-M 等微控制器固件仿真</td></tr></tbody></table>
 
+{% embed url="https://www.freebuf.com/articles/ics-articles/262454.html" %}
+
 ## FirmAE
 
 {% embed url="https://dl.acm.org/doi/10.1145/3427228.3427294" %}
@@ -140,6 +142,8 @@ FirmColic 通过符号执行（Concolic Execution）自动提取 “能覆盖深
 <table><thead><tr><th width="151.66668701171875">失败类别</th><th width="176.6666259765625">具体问题</th><th>仲裁策略</th></tr></thead><tbody><tr><td>启动相关</td><td>自定义初始化路径</td><td>从固件内核命令行提取初始化程序路径（如<code>init=/etc/preinit</code>），无信息时从文件系统搜索<code>preinit</code>等关键词</td></tr><tr><td></td><td>文件系统缺失</td><td>提取可执行文件中的路径字符串（如<code>/var</code>、<code>/etc</code>），预创建对应目录结构</td></tr><tr><td>网络相关</td><td>IP 别名冲突</td><td>忽略多 IP 路由规则，利用主机默认路由实现网络通信</td></tr><tr><td></td><td>DHCP 配置缺失</td><td>强制设置默认网络（如<code>eth0</code>为 192.168.0.1，桥接<code>br0</code>）</td></tr><tr><td></td><td>VLAN 设置不足</td><td>配置主机 TAP 接口与 guest 的 VLAN ID 一致</td></tr><tr><td></td><td>防火墙拦截</td><td>清空 guest 的<code>iptables</code>规则，默认接受所有入站流量</td></tr><tr><td>NVRAM 相关</td><td>自定义配置文件</td><td>预仿真阶段记录 NVRAM 键值对，从文件系统搜索含这些键的文件并提取配置</td></tr><tr><td></td><td>空值崩溃</td><td><code>nvram_get()</code>返回空字符串而非 NULL，避免空指针引用错误</td></tr><tr><td>内核相关</td><td>模块支持不足</td><td>拦截模块调用（如<code>acos_nat</code>），返回预定义值而非真实硬件交互结果</td></tr><tr><td></td><td>版本不兼容</td><td>升级内核至 4.1.17，开启<code>CONFIG_COMPAT_BRK</code>选项兼容旧版<code>libc</code></td></tr><tr><td>其他</td><td>Web 服务器未启动</td><td>搜索文件系统中的 Web 服务程序（<code>httpd</code>、<code>lighttpd</code>等），强制执行</td></tr><tr><td></td><td>超时过短</td><td>延长超时至 240 秒</td></tr><tr><td></td><td>工具缺失</td><td>向固件文件系统添加<code>busybox</code>（含<code>mount</code>、<code>ln</code>等工具）</td></tr></tbody></table>
 
 #### Arbitrated Emulation
+
+与Firmadyne类似，FirmAE在预先构建的自定义Linux内核和库上模拟固件镜像。它还模拟目标镜像两次，以收集各种系统日志，并利用这些信息进行进一步的仿真，前一个仿真步骤称为预仿真，后一个称为最终仿真。为了进行大规模分析，FirmAE致力于完全自动化。实际上Firmadyne的许多步骤已经自动化了，但是仍然需要一些用户交互。例如，用户必须首先使用特定选项提取目标固件的文件系统。然后，他们评估是否成功提取文件系统并检索架构信息。随后，他们为QEMU制作固件镜像并在预仿真中收集信息。最后，他们运行最终仿真的脚本并执行动态分析。FirmAE自动化了所有这些交互，并添加了一个用于网络可达性和Web服务可用性的自动评估过程。FirmAE还使用Docker 将仿真并行化，以有效评估大量固件镜像。
 
 论文提出一种技术——仲裁模拟，这个技术的核心是不严格遵循固件原始执行流程，核心思路是 “保证高层行为可用” 即可开展动态分析，无需定位和修复仿真失败的精确根源。**核心概念：仲裁点（Arbitration Point），**&#x662F; “**仿真流程中易发生失败、需注入干预操作的关键节点**”，需通过分析失败案例归纳得出
 
@@ -186,13 +190,6 @@ sudo ./run.sh -a dlink firmwares/DIR-868L_fw_revB_2-05b02_eu_multi_20161117.zip
 
 <figure><img src="../.gitbook/assets/d2d48c949ce97c17740791a67f5d0ea2.png" alt=""><figcaption><p>-a analyze模式 会模拟路由器并在对应IP开启服务</p></figcaption></figure>
 
-#### run.sh
-
-这一部分是启动的脚手架，处理完用户参数以后调用其他函数执行对应功能，运行流程大致如下：\
-**提取文件系统——提取内核——检查架构——封装qemu镜像——运行模拟，开启网络服务——提供交互终端**
-
-`run_emulation()` 是核心函数，首先在提取文件系统以前**进行一些检查**，，通过 `get_brand` 得到 `BRAND`，得到 `FILENAME` ，初始化 `PING_RESULT`/`WEB_RESULT`/`IP` ，检查 `BRAND`/Docker 与 PostgreSQL 连接
-
 {% hint style="info" %}
 Linux 系统启动的大致流程：
 
@@ -220,8 +217,27 @@ Linux 系统启动的大致流程：
   * `cramfs`（压缩文件系统）
   * `ext4`（常见于 SD 卡或 NAND）
 * 存储在固件镜像中（例如 `rootfs.img`、`root.squashfs`）
-* 在启动时由内核挂载为 `/`
+* 在启动时由内核挂载为 `/`&#x20;
+* rootfs基本的目录参考：
+
+/\
+├── bin/ # 基本命令，如 ls、cp、mv 等\
+├── sbin/ # 系统命令，如 init, ifconfig, busybox\
+├── etc/ # 配置文件，如 passwd, network/interfaces\
+├── lib/ # 共享库\
+├── usr/ # 用户命令与库\
+├── var/ # 日志、临时文件\
+├── tmp/\
+├── dev/ # 设备文件\
+└── init # 启动脚本
 {% endhint %}
+
+#### run.sh
+
+这一部分是启动的脚手架，处理完用户参数以后调用其他函数执行对应功能，运行流程大致如下：\
+**提取文件系统——提取内核——检查架构——封装qemu镜像——运行模拟，开启网络服务——提供交互终端**
+
+`run_emulation()` 是核心函数，首先在提取文件系统以前**进行一些检查**，，通过 `get_brand` 得到 `BRAND`，得到 `FILENAME` ，初始化 `PING_RESULT`/`WEB_RESULT`/`IP` ，检查 `BRAND`/Docker 与 PostgreSQL 连接
 
 然后**调用 extractor.py提取文件系统rootfs**
 
@@ -290,4 +306,85 @@ timeout --preserve-status --signal SIGINT 300 \
 
 #### extractor.py
 
-递归固件提取器，旨在从基于 Linux 的固件镜像中提取内核镜像和/或压缩文件系统。它包含多种启发式算法，以避免提取某些被列入黑名单的文件类型，并避免超出特定广度和深度限制的无效提取
+递归固件提取器，旨在从基于 Linux 的固件镜像中提取内核镜像和/或压缩文件系统。它包含多种启发式算法，以避免提取某些被列入黑名单的文件类型，并避免超出特定广度和深度限制的无效提取，`extractor.py` 的目标是从一个固件镜像文件中：
+
+* 找出其中包含的 **Linux kernel**；
+* 找出并提取 **rootfs（文件系统）**；
+* 最终将它们打包保存为：
+  * `xxx.kernel`
+  * `xxx.tar.gz`
+
+然后这些文件会被后续模块（如 `firmadyne.config.createImage.py`）加载到仿真环境中，挂载 rootfs 并启动系统。
+
+`class Extractor` 负责：
+
+* 扫描输入路径中的所有固件文件；
+* 建立多进程池；
+* 调用 `ExtractionItem` 去执行每个文件的提取任务
+
+`class ExtractionItem`负责单个固件文件的“提取任务”的封装。
+
+每个固件会经历以下检测链：
+
+1. `_check_blacklist()`\
+   → 排除掉不需要处理的文件类型（例如 `.pdf`、`.so`、图片等）。
+2. `_check_firmware()`\
+   → 识别常见固件格式（如 uImage、TRX、TP-Link header），按 offset 解析出 kernel / rootfs。
+3. `_check_kernel()`\
+   → 检测是否包含 “kernel version” 字样，确认是内核文件。
+4. `_check_rootfs()`\
+   → 检测提取结果目录下是否有 UNIX 根目录结构（bin、etc、lib 等）。
+5. `_check_recursive()`\
+   → 如果是压缩包或嵌套文件系统（如 `.squashfs`、`.cramfs`），递归再提取。
+
+**rootfs 的提取逻辑**
+
+实现函数：`io_find_rootfs()`
+
+这个函数的逻辑是：
+
+1. 从一个目录（如 `squashfs-root/`）开始；
+2.  判断其下是否包含 Linux 典型目录：
+
+    ```
+        # Directories that define the root of a UNIX filesystem, and the
+        # appropriate threshold condition
+        UNIX_DIRS = ["bin", "etc", "dev", "home", "lib", "mnt", "opt", "root",
+                     "run", "sbin", "tmp", "usr", "var"]
+        UNIX_THRESHOLD = 4
+    ```
+3. 如果数量 ≥ 4，认为找到了 rootfs；
+4. 若不是，则递归进入子目录继续寻找；
+5. 找到后返回 `(True, path)`；
+6. 最终会在 `_check_rootfs()` 中打包为 `.tar.gz`
+
+对于kernel，FirmAE识别两类 header：**uImage**（通过 `"uImage header"`）和 **TP-Link/TRX 风格 header**（通过 `rootfs offset`/`kernel offset` 字眼），
+
+* 对 uImage：它假设 `kernel` 紧接在 header 后面的 `entry.offset + 64` 处，且从 `desc` 中解析 `image size:` 得到大小，用 `io_dd` 抠出二进制，构建新的 `ExtractionItem` 再递归提取。
+* 对 TRX/TP-Link：从 `desc` 解析 header\_size、kernel offset/length、rootfs offset/length（16 进制），把偏移转为文件内实际位置后分别 `io_dd` 出 kernel 和 rootfs，递归提取
+
+
+
+#### inferKernel.py
+
+<pre><code><strong>##构造 QEMU 启动命令
+</strong>##一般形式为：
+qemu-system-mipsel \
+    -kernel images/1234.kernel \
+    -drive file=images/1234.rootfs,format=raw \
+    -append "root=/dev/sda console=ttyS0 init=/sbin/init"
+</code></pre>
+
+* 很多嵌入式固件 **并不遵循标准 Linux 启动规范**。
+* 它们可能：
+  * 使用非标准的 init 脚本，例如 `/etc/preinit`、`/etc/init.d/rcS`；
+  * 或者使用厂商自定义的二进制 init（例如 `/bin/init_main`）；
+  * 甚至没有显式 init，直接在 rcS 里起守护进程。
+
+如果命令行写错，比如指定了一个不存在的 init，系统就会在启动阶段崩溃，打印：
+
+```plsql
+Kernel panic - not syncing: No init found. Try passing init= option to kernel.
+```
+
+从 `./images/<IID>.kernel`（提取出来的内核二进制）里用 `strings` 找出含 `init=/` 的命令行片段，把这些 `init=...` 条目写到 `scratch/<IID>/kernelInit` 供后续尝试启动
