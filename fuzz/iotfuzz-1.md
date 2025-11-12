@@ -424,8 +424,6 @@ timeout --preserve-status --signal SIGINT 300 \
 * 对 uImage：它假设 `kernel` 紧接在 header 后面的 `entry.offset + 64` 处，且从 `desc` 中解析 `image size:` 得到大小，用 `io_dd` 抠出二进制，构建新的 `ExtractionItem` 再递归提取。
 * 对 TRX/TP-Link：从 `desc` 解析 header\_size、kernel offset/length、rootfs offset/length（16 进制），把偏移转为文件内实际位置后分别 `io_dd` 出 kernel 和 rootfs，递归提取
 
-
-
 #### inferKernel.py
 
 <pre><code><strong>##构造 QEMU 启动命令
@@ -449,3 +447,83 @@ Kernel panic - not syncing: No init found. Try passing init= option to kernel.
 ```
 
 从 `./images/<IID>.kernel`（提取出来的内核二进制）里用 `strings` 找出含 `init=/` 的命令行片段，把这些 `init=...` 条目写到 `scratch/<IID>/kernelInit` 供后续尝试启动
+
+#### fuzzer.py
+
+针对命令注入和缓冲区溢出漏洞的fuzzer
+
+```python
+##fuzzer.py [mode] [brand] [iid] [target]
+main() 
+    preprocess()                # 生成payload模板
+    get_open_port()             # 解析nmap结果，找出开放端口
+    extract_image()             # 解压固件文件系统
+    get_information()           # 分析CGI、HNAP、SOAP、UPnP接口等
+    clear_image()               # 清理临时目录
+    send_dummy(...)             # 构造模糊测试请求发送
+    get_execve_log(...)         # 从QEMU日志中提取异常执行点
+    fuzz(dummy_list[idx])       # 对可能出问题的接口再重点攻击
+```
+
+`get_open_port()`
+
+作用：
+
+* 从 `analyses_log/{brand}/{iid}/nmap_log.txt` 解析 nmap 扫描结果，
+* 找出目标固件镜像中开放的端口，
+* 特别关注 80/1900/5000 等常见 Web/UPnP 服务端口。
+
+这些端口会作为后续 fuzz 的目标
+
+`extract_image()` & `clear_image()`
+
+作用：
+
+* `extract_image()` 将固件的 `.tar.gz` 镜像解包到一个临时目录，
+* `clear_image()` 测试完后删除目录，节省空间。
+
+`get_information()`
+
+负责分析解包出来的固件文件系统，提取出**潜在攻击面信息**：
+
+<table><thead><tr><th width="210">检测目标</th><th>说明</th></tr></thead><tbody><tr><td><code>cgi_map</code></td><td>扫描可执行文件中带 <code>.cgi</code> 的字符串、参数、HTTP头字段</td></tr><tr><td><code>hnap_map</code></td><td>分析 HNAP（SOAP over HTTP）服务定义的 XML 接口</td></tr><tr><td><code>ssdp_list</code></td><td>检测 UPnP SSDP 广播接口中的 ST 字段</td></tr><tr><td><code>action_map</code></td><td>解析 HTML 表单中 <code>&#x3C;form></code> 的 action 和参数</td></tr><tr><td><code>key_value_map</code></td><td>提取 HNAP 协议中常见键值（如 result_xml.Set）</td></tr></tbody></table>
+
+这些都是嵌入式 Web 服务常见的命令注入入口。
+
+它通过多种方式：
+
+* `find` + `strings` 提取 CGI 二进制中的关键字；
+* `BeautifulSoup` 解析 HTML；
+* `requests` 访问 ASP 页面；
+* `re.findall()` 识别 HNAP XML；
+* 结果打印成结构化 map。
+
+这一步的结果会传入 `send_dummy()` 用于模糊测试输入
+
+`send_dummy()`
+
+在 IoT 固件仿真中：
+
+* 许多协议服务（HTTP、FTP、Telnet 等）**在第一次握手时才初始化内存结构**；
+* 如果 fuzz 从“随机字节流”开始，服务端可能立即拒绝；
+* `send_dummy()` 先发一个合法包，可以让服务“进入工作状态”，为后续 fuzz 提供稳定上下文。
+
+这类似 AFLNet 中的：`state-aware fuzzing`，在进入特定协议状态后再进行变异。
+
+1. 遍历每个开放端口；
+2. 对于每种服务类型：
+   * **HNAP** → 伪造 SOAP 请求包；
+   * **CGI** → 用 payload 测试参数、header；
+   * **SSDP** → UDP 发送 fuzz 包；
+   * **HTTP Action** → 构造 GET/POST 表单参数注入；
+   * **Cookie 注入** → 在 Cookie 中放置 payload；
+3. 对每次 payload 发送都打上编号，如 `d34d1234` 或超长字符串；这些 `d34dXXXX` 标记字符串会在 QEMU 的日志中留下踪迹
+4. 返回“dummy\_idx\_list”，记录所有被测试的目标。
+
+`fuzz()`
+
+针对 `get_execve_log()` 中检测到的危险点，进行**二次模糊测试**：
+
+* 重复多次尝试；
+* 在 SOAP/HNAP/HTTP/SSDP 请求中嵌入不同变体 payload；
+* 持续观察 QEMU 是否崩溃或输出异常
