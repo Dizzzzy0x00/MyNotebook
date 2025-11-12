@@ -141,6 +141,67 @@ FirmColic 通过符号执行（Concolic Execution）自动提取 “能覆盖深
 
 <table><thead><tr><th width="151.66668701171875">失败类别</th><th width="176.6666259765625">具体问题</th><th>仲裁策略</th></tr></thead><tbody><tr><td>启动相关</td><td>自定义初始化路径</td><td>从固件内核命令行提取初始化程序路径（如<code>init=/etc/preinit</code>），无信息时从文件系统搜索<code>preinit</code>等关键词</td></tr><tr><td></td><td>文件系统缺失</td><td>提取可执行文件中的路径字符串（如<code>/var</code>、<code>/etc</code>），预创建对应目录结构</td></tr><tr><td>网络相关</td><td>IP 别名冲突</td><td>忽略多 IP 路由规则，利用主机默认路由实现网络通信</td></tr><tr><td></td><td>DHCP 配置缺失</td><td>强制设置默认网络（如<code>eth0</code>为 192.168.0.1，桥接<code>br0</code>）</td></tr><tr><td></td><td>VLAN 设置不足</td><td>配置主机 TAP 接口与 guest 的 VLAN ID 一致</td></tr><tr><td></td><td>防火墙拦截</td><td>清空 guest 的<code>iptables</code>规则，默认接受所有入站流量</td></tr><tr><td>NVRAM 相关</td><td>自定义配置文件</td><td>预仿真阶段记录 NVRAM 键值对，从文件系统搜索含这些键的文件并提取配置</td></tr><tr><td></td><td>空值崩溃</td><td><code>nvram_get()</code>返回空字符串而非 NULL，避免空指针引用错误</td></tr><tr><td>内核相关</td><td>模块支持不足</td><td>拦截模块调用（如<code>acos_nat</code>），返回预定义值而非真实硬件交互结果</td></tr><tr><td></td><td>版本不兼容</td><td>升级内核至 4.1.17，开启<code>CONFIG_COMPAT_BRK</code>选项兼容旧版<code>libc</code></td></tr><tr><td>其他</td><td>Web 服务器未启动</td><td>搜索文件系统中的 Web 服务程序（<code>httpd</code>、<code>lighttpd</code>等），强制执行</td></tr><tr><td></td><td>超时过短</td><td>延长超时至 240 秒</td></tr><tr><td></td><td>工具缺失</td><td>向固件文件系统添加<code>busybox</code>（含<code>mount</code>、<code>ln</code>等工具）</td></tr></tbody></table>
 
+
+
+* **自定义初始化路径**
+  * 在 Linux 系统启动时，内核加载完成后会调用用户空间的第一个进程——通常是 `/sbin/init`。
+  * 但许多嵌入式固件（例如 OpenWRT、TP-Link、D-Link）为了轻量化，会将启动流程自定义，比如：
+    * `/etc/preinit`（OpenWRT）
+    * `/etc/init.d/rcS`（传统 BusyBox）
+    * `/bin/init_main`（厂商自研）
+  * 这个路径可以通过内核命令行参数 `init=/xxx` 写入到内核镜像中
+  *   仿真时，如果 QEMU 传入的 init 程序路径与固件真实路径不符，系统会 panic：
+
+      ```
+      Kernel panic - not syncing: No init found. Try passing init= option to kernel.
+      ```
+  * **FirmAE 策略：**
+    * 用 `strings` 搜索内核镜像中的命令行参数，提取其中的 `init=/...`；
+    * 若没有，则遍历文件系统，搜索 `preinit`、`rcS` 等关键词；
+    * 动态生成 QEMU 启动参数，保证能正确执行 init。
+* **文件系统缺失**
+  * 在真实设备中，根文件系统（rootfs）通常完整包含 `/etc`, `/var`, `/tmp`, `/proc` 等目录。
+  * 但部分固件在打包时会省略某些空目录，或者采用延迟挂载。
+  * 系统 init 脚本中引用这些路径（例如写日志到 `/var/log`）时会出错：`mkdir: cannot create directory '/var/log': No such file or directory`
+  * FirmAE策略
+    * 使用 `strings` 扫描固件中可执行文件的路径常量；
+    * 自动在 rootfs 中创建缺失目录；
+    * 确保启动脚本和服务运行时目录存在。
+* IP 别名冲突
+  * 部分固件为不同接口配置多个 IP（如 WAN/LAN 共用），或默认路由规则冲突；
+  * 在仿真环境中，QEMU 虚拟机仅有一个虚拟网卡（通常为 `eth0`）。
+  * **FirmAE 策略：**
+    * 忽略固件中的复杂路由配置；
+    * 强制使用宿主机默认路由规则；
+    * 统一将 `eth0` 用作主要通信接口。
+* DHCP 配置缺失
+  * 真实设备启动时会从 Flash 读取默认 IP（如 192.168.0.1）；但在仿真环境中，缺少硬件配置文件。
+  * **FirmAE 策略：**
+    * 手动分配默认 IP；
+    *   配置网桥：
+
+        ```bash
+        ifconfig eth0 192.168.0.1 up
+        brctl addbr br0
+        brctl addif br0 eth0
+        ```
+    * 确保固件内的 Web 服务（如管理界面）能被访问。
+* VLAN设置不足
+  * TAP 接口是 Linux 提供的一种 **虚拟网络设备**，用于在 **用户空间程序**（如 QEMU、FirmAE） 和 **内核网络栈** 之间传输以太网帧。它没有物理硬件。当 QEMU 或其他用户空间程序打开它时，可以直接 **读写以太网帧**，从而模拟网络流量。
+  * FirmAE 使用 QEMU 仿真固件时，为了让固件中的服务（如 Web 界面、DHCP、Telnet）能正常通信，它会：
+    1. 创建一个 TAP 接口（如 `tap0`）；
+    2. 把 TAP 接口加入一个虚拟网桥（`br0`）；
+    3. 分配一个 IP（例如 `192.168.0.1`）；
+    4. 将 QEMU 启动参数中的虚拟网卡连接到 TAP 接口
+* **NVRAM相关**
+  * **NVRAM** 是 **Non-Volatile Random Access Memory** （非易失性随机存取存储器）的缩写，指一种在断电后仍能保留数据的存储介质。在嵌入式系统（如路由器、智能家居设备等）中，NVRAM 通常用于存储设备的**持久化配置信息** ，例如网络设置、硬件参数或系统偏好。
+  * **为什么要设置NVRAM默认值？**
+    * 嵌入式设备使用NVRAM存储持久化配置（如IP地址、SSID、硬件型号），通常通过`nvram get xxx`读取。
+    * **模拟必要性**:真实设备的NVRAM存储在Flash，模拟环境无物理存储。固件可能因缺失关键NVRAM变量（如`lan_ipaddr`）导致服务崩溃。通过覆盖默认值可模拟特定设备型号（如伪装成Linksys路由器）。
+    * 在真实设备中，NVRAM 通常存储在 Flash 的特定分区。但在模拟环境中，由于缺乏物理硬件，需通过以下方式模拟：文件系统覆盖，用户空间库劫持（LD\_PRELOAD），内核模块模拟，QEMU 设备模拟，内存文件系统（tmpfs）
+* **什么是BusyBox**？
+  * BusyBox 是资源受限环境下 Linux 系统的基石，通过高度集成和精简设计，在最小化体积的同时提供基础系统功能支持。它是嵌入式开发、系统救援和容器化场景中的关键工具。
+
 #### Arbitrated Emulation
 
 与Firmadyne类似，FirmAE在预先构建的自定义Linux内核和库上模拟固件镜像。它还模拟目标镜像两次，以收集各种系统日志，并利用这些信息进行进一步的仿真，前一个仿真步骤称为预仿真，后一个称为最终仿真。为了进行大规模分析，FirmAE致力于完全自动化。实际上Firmadyne的许多步骤已经自动化了，但是仍然需要一些用户交互。例如，用户必须首先使用特定选项提取目标固件的文件系统。然后，他们评估是否成功提取文件系统并检索架构信息。随后，他们为QEMU制作固件镜像并在预仿真中收集信息。最后，他们运行最终仿真的脚本并执行动态分析。FirmAE自动化了所有这些交互，并添加了一个用于网络可达性和Web服务可用性的自动评估过程。FirmAE还使用Docker 将仿真并行化，以有效评估大量固件镜像。
