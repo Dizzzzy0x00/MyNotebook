@@ -49,6 +49,7 @@
 * [LibAFL-Learn](fuzz/libafl-learn.md)
 * [iotFuzz-1](fuzz/iotfuzz-1.md)
 * [iotFuzz-2](fuzz/iotfuzz-2.md)
+* [iotFuzz-3](fuzz/iotfuzz-3.md)
 
 ## AI-Attack
 
