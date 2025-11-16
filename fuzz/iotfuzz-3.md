@@ -29,10 +29,46 @@ Camveil: Unveiling Security Camera Vulnerabilities through Multi-Protocol&#x20;
 
 在实际部署中，摄像机协议通常通过访问和修改共享的系统状态进行交互。当多个客户端同时通过不同的协议发出操作公共内部资源的命令时，就会出现这种交互。例如，如图 1 所示，HTTP 客户端可以发送 `continuous_move` 请求，将摄像机的运动状态从空闲更改为运动状态，并更新其位置值。与此同时，ONVIF 客户端可以发出 `move_up` 命令，同样修改摄像机的运动和位置状态。类似地，RTSP 客户端可以通过 `PLAY` 请求启动视频流，而 ONVIF 客户端同时重置编码方式，这两个操作都会影响摄像机的编码状态
 
-一个漏洞示例：[CVE2023-3959](https://nvd.nist.gov/vuln/detail/CVE-2023-3959)，并发的ONVIF和RTSP请求访问共享资源（例如编码状态）时，该漏洞会被触发，导致XML解析错误和实时视频流中断。
-
 <figure><img src="../.gitbook/assets/80f3bbe90ac6e7b8535435507ff67534.png" alt=""><figcaption></figcaption></figure>
 
 * **ONVIF**：跨厂商安全设备标准协议。
 * **RTSP**：实时流媒体控制（PLAY、PAUSE、SETUP）。
 * **HTTP**：用于 PTZ 控制和各种配置项（如速度、位置）。
+
+
+
+一个漏洞示例：[CVE2023-3959](https://nvd.nist.gov/vuln/detail/CVE-2023-3959)，并发的ONVIF和RTSP请求访问共享资源（例如编码状态）时，该漏洞会被触发，导致XML解析错误和实时视频流中断。
+
+{% embed url="https://www.iotsec-zone.com/article/423" %}
+
+<figure><img src="../.gitbook/assets/3cb927f161f32fb11226672002485717.png" alt=""><figcaption></figcaption></figure>
+
+第一步：攻击者发送恶意 ONVIF 配置请求数据包包含如`SetVideoEncoderConfiguration` / `SetSystemDateAndTime` 或类似的 ONVIF 配置操作的字段
+
+* 这些字段允许字符串内容（如 Encoder name、Profile name）。
+* 字段内容未严格验证。
+* 攻击者塞入恶意 payload，例如：`$(sleep 9999)` 或者`; reboot;`
+
+ONVIF 守护进程把这些字段写入一个 **全局结构体 global\_config\_struct** 里。**这个结构体稍后会被其他模块读取。**
+
+第二步：攻击者发送另一个 HTTP 请求
+
+* 访问 Web 管理界面 CGI，如\
+  `/param.cgi?action=update&...`
+* 此操作会调用 firmware 中的函数（论文说是 `check_para()`）。
+  * 它会从之前的**同一个全局结构体**中读取 encoder 配置字段。
+  * 然后执行类似：`popen(global_config_struct->encoder_name, "r");`
+* 如果这个字段是：`$(sleep 9999)` 或`; busybox reboot ;`，就会**直接通过 popen 执行命令**。
+
+<table><thead><tr><th width="124.33331298828125">动作</th><th>协议</th><th>行为</th></tr></thead><tbody><tr><td>1</td><td><strong>ONVIF</strong></td><td>写入恶意数据到全局结构</td></tr><tr><td>2</td><td><strong>HTTP</strong></td><td>触发另一个进程逻辑读取这份数据</td></tr><tr><td>3</td><td><strong>HTTP</strong></td><td>popen 执行数据 → RCE</td></tr></tbody></table>
+
+设计目标：一个实用的安全摄像头漏洞检测框架应具备以下特性：
+
+* 跨协议交互覆盖。该框架应能有效探索跨多个协议的交互。许多实际应用中的IP摄像头漏洞都源于不同协议之间的相互作用。系统必须能够生成语义清晰且状态感知的消息序列，以反映真实的多协议工作流程并暴露交互引起的漏洞。
+* 检测非崩溃逻辑漏洞。该框架应能够识别不会导致系统崩溃的功能性漏洞。这些漏洞包括命令注入、配置不一致和视频流冻结。为了检测此类细微问题，系统必须集成语义监视器（VLC播放器、PTZ状态检索器和系统状态检索器生成标准请求来查询摄像机的运行时状态），以分析运行时行为并检测除简单连接丢失或异常之外的异常情况。
+* 黑盒兼容性。由于许多商用IP摄像头提供有限的访问权限和闭源固件，该框架必须在黑盒环境下工作，在这种情况下收集代码覆盖率是不可行的。它应仅依赖于外部可观察的行为和公开的协议接口，而无需插桩、调试符号或root权限。
+
+<figure><img src="../.gitbook/assets/6f37a5afc2c6dbefc49a918cb8f8b59c.png" alt=""><figcaption></figcaption></figure>
+
+
+
