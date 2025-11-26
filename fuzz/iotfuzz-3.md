@@ -1,6 +1,8 @@
 # iotFuzz-3
 
-## Shodan
+## IP摄像头
+
+### Shodan
 
 {% embed url="https://www.shodan.io/" %}
 
@@ -8,7 +10,7 @@
 
 {% embed url="https://bugprove.com/knowledge-hub/cve-2023-3959-cve-2023-4249-multiple-critical-vulnerabilities-in-zavio-ip-cameras/" %}
 
-## Ientifying Challenges with Fuzzing the RLC-510WA IP Camera using AFL++
+### Ientifying Challenges with Fuzzing the RLC-510WA IP Camera using AFL++
 
 {% embed url="https://ntnuopen.ntnu.no/ntnu-xmlui/handle/11250/3204628" %}
 
@@ -22,8 +24,7 @@
   * 进行了网络层黑盒 fuzz（使用 XML 字典与 send 脚本）并尝试通过 AFL++（非 instrumented）跑 PoC。也尝试了用编译好的 C-wrapper 替代 Bash wrapper，这样可显著提高执行速度。
   * 没有发现可复现的 crash/漏洞（因此也没进入 runtime 分析 / 利用阶段）。论文说明未发现挂起/崩溃，无法做进一步利用
 
-Camveil: Unveiling Security Camera Vulnerabilities through Multi-Protocol&#x20;Coordinated Fuzzing
--------------------------
+### Camveil: Unveiling Security Camera Vulnerabilities through Multi-Protocol&#xD; Coordinated Fuzzing
 
 {% embed url="https://www.computer.org/csdl/proceedings-article/sp/2026/606500a021/2bojv6StLlS" %}
 
@@ -70,5 +71,51 @@ ONVIF 守护进程把这些字段写入一个 **全局结构体 global\_config\_
 
 <figure><img src="../.gitbook/assets/6f37a5afc2c6dbefc49a918cb8f8b59c.png" alt=""><figcaption></figcaption></figure>
 
+## NVR设备
 
+{% embed url="https://www.cve.org/CVERecord/SearchResults?query=NVR" %}
 
+<table><thead><tr><th width="163">类别</th><th>监控内容</th></tr></thead><tbody><tr><td>system</td><td>进程、CPU、内存、重启</td></tr><tr><td>user</td><td>用户管理文件、账号更改</td></tr><tr><td>storage</td><td>HDD 状态、录像文件</td></tr><tr><td>network</td><td>端口、cloud 连接</td></tr><tr><td>video</td><td>RTSP 通道（多个通道）</td></tr></tbody></table>
+
+#### **无 Crash 的逻辑漏洞**&#x20;
+
+这种漏洞不会导致：
+
+* 崩溃
+* 异常退出
+* 内存越界
+
+但会导致
+
+权限绕过、弱权限检查、文件未授权读取、配置被默默修改、命令被执行但返回数据正常 如200 OK、越权 API 调用
+
+#### **Side-Effect（系统副作用）触发的漏洞 —— 系统产生异常行为**
+
+很常见于 NVR / DVR / 路由器：
+
+* 发一个请求 → 返回 200
+* 但后台执行了危险操作
+
+比如：
+
+* 创建新用户
+* 修改某配置
+* 触发守护进程异常
+* 导致录像停止
+* 删除录像文件
+* 写入某路径
+* 导致系统重启或卡死（但不 crash）
+* 接口执行耗时命令（CPU 满负载）
+
+#### **配置变更引发的漏洞（Configuration-driven Bugs）**
+
+很多 IoT / NVR 的漏洞不仅与输入有关，还与设备配置状态有关：
+
+举例：
+
+* 勾选某项 → 某个 CGI 自动被激活
+* 开启“云同步” → 内部守护进程启动并开放未认证接口
+* 修改语言 → CGI 使用不同编码 → 引发解析错误
+* 切换视频通道 → 触发某个旧版本函数
+
+很多漏洞必须在**特定设置下**才能复现。普通 fuzz 不会改变设备配置，因此无法测试。
