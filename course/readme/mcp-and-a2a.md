@@ -44,7 +44,6 @@ MCP（Model Context Protocol，模型上下文协议）由Anthropic于2024年11�
 本地通讯：使用了stdio传输数据，具体流程Client启动Server程序作为子进程，其消息通讯是通过stdin/stdout进行的，消息格式为JSON-RPC 2.0。
 
 远程通讯：Client与Server可以部署在任何地方，Client使用SSE与Server进行通讯，消息的格式为JSON-RPC 2.0，Server定义了/see与/messages接口用于推送与接收数据。\
-\
-
+<br>
 
 

@@ -56,6 +56,7 @@
 * [AI-Attack-NLP Attacks](ai-attack/ai-attack-nlp-attacks.md)
 * [AI-Attack-LLM Attacks](ai-attack/ai-attack-llm-attacks.md)
 * [AI-Attack-CV Attacks](ai-attack/ai-attack-cv-attacks.md)
+* [LLMFuzzer](ai-attack/llmfuzzer.md)
 
 ## Rust
 

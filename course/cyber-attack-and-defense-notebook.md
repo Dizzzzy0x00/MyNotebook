@@ -192,8 +192,7 @@ def baidu_search():
 
       缺点：需要使用RAW Socket编程，实现起来较为复杂，Windows/Cisco 等系统没有遵从规范，开放端口对于伪造 TCP 包也反馈 RST，这几种方法不适用。
 
-      \
-
+      <br>
   *   **UDP 端口扫描**
 
       对目标端口发送特殊定制的 UDP 数据报文。 开放端口：UDP 反馈 关闭端口：ICMP port unreachable 报文。

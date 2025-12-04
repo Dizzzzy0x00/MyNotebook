@@ -32,8 +32,7 @@ coverY: 135
 
 <figure><img src="../../.gitbook/assets/8be0b6175f70b7d03bc3feb7492e28b.png" alt=""><figcaption></figcaption></figure>
 
-那么先创建一个要求验证的密钥文件的并输入一些文字进行测试：`echo 12345> CRACKME3.KEY`\
-
+那么先创建一个要求验证的密钥文件的并输入一些文字进行测试：`echo 12345> CRACKME3.KEY`<br>
 
 <figure><img src="../../.gitbook/assets/045a193d7b9902930e4036296c41558.png" alt=""><figcaption></figcaption></figure>
 
