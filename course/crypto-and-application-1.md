@@ -288,3 +288,87 @@ $$
 
 <div><figure><img src="../.gitbook/assets/84096244-33f8-4c59-a8ac-fe24e7b89638.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/27974c17-c142-4c6e-9312-6388c5b970ce.png" alt=""><figcaption></figcaption></figure></div>
 
+#### 熵的概念与熵的特性
+
+<div><figure><img src="../.gitbook/assets/976b0a9b-c492-4ede-946b-f78d3f4f14ce.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/9d0cc579-8894-42ad-9143-6aa7894ab3e6.png" alt=""><figcaption></figcaption></figure></div>
+
+<div><figure><img src="../.gitbook/assets/86db5e66-663f-4e81-8c9a-e2dca903887b.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/image (103).png" alt=""><figcaption></figcaption></figure></div>
+
+#### 多余度和唯一解距离
+
+<figure><img src="../.gitbook/assets/19df0ea7-371e-418a-a062-fd781bcbc532.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/6002c289-9e97-4f07-bf9d-2418c31ac505.png" alt=""><figcaption></figcaption></figure>
+
+当密码分析者所截获的密文字符数小于 $$U_d$$时，存在多个可能的解（存在伪密钥），但当所截获的密文字符数大于 $$U_d$$时，这种密码的破译问题理论上就存在唯一解。
+
+**唯一解距离**表示了密码分析者必须处理的密文量的**理论下限，**&#x4F8B;如计算出密码的唯一解距离 $$U_d=28$$,则至少要给出长度为28的密文串，唯一地破解该密码才有可能
+
+#### 完全保密体制和理论保密体制
+
+完全保密性（Perfect Secrecy ） ：对于密码分析者通过观察密文不能获得有关明文的任何信息。\
+定义： $$对\forall m\in M,c\in C,有:P_r(m|c)=P_r(m)$$即**明文m的后验概率等于明文m的**\
+**先验概率**，则该密码体制具有完全保密性。
+
+密码体制的完全保密性是**针对唯密文攻击而言的**。一个完全保密密码体制并**不能保证它在已知明文攻击或选择明文攻击下也是安全的**。
+
+<figure><img src="../.gitbook/assets/ecc2d41d-4914-4ee5-9215-e4154448c5b4.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/5f5b56b7-9439-4fb3-8e7d-84fcb387b132.png" alt=""><figcaption></figcaption></figure>
+
+理想保密性（Ideal Secrecy ）：\
+定义：当一个密码体制的**唯一解距离** $$U_d$$**趋向于无穷大**时，该密码体制就称为具有理想保密性。
+
+<figure><img src="../.gitbook/assets/f7119247-a0a2-4633-bd7e-8cc1735dd844.png" alt=""><figcaption></figcaption></figure>
+
+#### 扩散与扰乱原理&#xD;
+
+扩散原理(diffusion)：尽量使得明文的每一位都影响密文中许多位的值\
+扰乱原理(confusion)：使密文与明文、加密密钥之间的统计关系尽量复杂化，使破译者难以从密文的统计特性导出与密钥相关的信息
+
+#### 乘积密码体制
+
+对于幂等密码，有:
+
+$$
+对 m\in M,\forall k_1,k_2\in K,\exists k_3\in K,
+满足：E_{k_2}(E_{k_1}(m))=E_{k_3}(m)
+$$
+
+**迭代密码体制必须使用非幂等密码体制。**
+
+<div><figure><img src="../.gitbook/assets/0393ae9a-a272-4a62-b936-3a274d75a505.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/1c99b68b-7244-4f11-b6b5-1adefb2074d8.png" alt=""><figcaption></figcaption></figure></div>
+
+## CH-3 对称密码技术
+
+#### 分组密码的设计原理和整体结构
+
+分组密码是一种将明文分成固定长度的块，然后对每个块进行加密的密码算法。在**设计分组密码时，需要满足以下要求**：
+
+1. **分组长度足够大**：为了提高安全性，分组长度应该足够大。当明文分组长度为n位时，至多需要2n个明文密文对就可完全破解密码。因此，分组长度的大小应该足够大，**防止攻击者通过收集不同的密文、明文对来进行穷举明文空间攻击**
+2. **密钥空间足够大**：**防止攻击者穷举密钥空间的攻击**
+3. **密码算法足够复杂**：分组密码的设计要求密码变换必须足够复杂，使攻击者**除了强行攻击（穷举）外，找不到其他便捷的数学破译方法**。这样可以有效防止攻击者通过分析密文得到有意义的明文。
+
+分组密码的设计原理主要包括**数学规则、简单函数和非线性函数等运算**。
+
+在整体结构上，分组密码通常包括**密钥调度、初始置换、多次轮函数迭代和最后的逆初始置换**等部分。其中，**轮函数**是分组密码的核心部分，由非线性函数构成，可以有效地防止攻击者通过分析密文得到明文。
+
+分组密码的分析方法主要包括朴素密码分析、差分密码分析、线性密码分析和相关密钥密码分析等。这些方法都是通过分析密文和密钥之间的关系，尝试破解出明文和密钥。为了提高安全性，现代的分组密码算法通常采用多种分析方法的结合，以增加破解的难度。
+
+密钥管理是分组密码应用中的重要环节。为了保证安全性，密钥应该在安全的环境中生成、存储和使用。同时，应该定期更换密钥，以降低密钥被破解的风险。此外，对于一些重要的数据加密场景，可以采用一些额外的安全措施，如使用硬件加密模块等来保护密钥的安全性。
+
+分组密码的工作模式主要包括**电子密码本模式、密文链接模式和计数器模式**等。这些模式可以根据实际应用场景选择使用。在选择工作模式时，应该充分考虑安全性、效率和实现难度等因素。
+
+分组密码的检测与评估：为了确保分组密码的安全性，需要对算法进行严格的检测和评估。评估指标主要包括算法的安全性、效率、实现难度和资源占用等方面。此外，还可以通过对比分析不同的分组密码算法来评估其优劣
+
+#### 分组密码的两种基本结构SPN，Feistel、分组密码原理与概念
+
+<div><figure><img src="../.gitbook/assets/113de309917114c7b80aad0668292949.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/624431ab-4a31-4e0a-91bd-fe98bfe33f52.png" alt=""><figcaption></figcaption></figure></div>
+
+<figure><img src="../.gitbook/assets/891a008a-610e-49fb-8d33-16017b069e41.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/a356f335-f179-4ee3-8b5a-12983e854046.png" alt=""><figcaption></figcaption></figure>
+
+<div><figure><img src="../.gitbook/assets/57589dad-04b1-4121-bf9d-a3561bc8b83c.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/321f45ac-9e23-4e7e-a0a0-4cd09e71f219.png" alt=""><figcaption></figcaption></figure></div>
+
+最后的解密输出为： ，即加密输入的明文分组
