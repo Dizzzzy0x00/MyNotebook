@@ -28,7 +28,7 @@ LLM是复杂的模型，具有新的自由度：它们非常庞大；它们是�
 
 LLMs是指那些在大量数据上进行预训练的**巨型语言模型**，而PLMs则特指那些具有较小参数的早期**预训练模型**，作为良好的初始化模型，进一步在任务特定数据上进行微调，以实现对下游任务的满意结果。LLMs和PLMs之间最重要的区别在于“新兴能力”（Wei等人，2022a）——处理在训练数据中未出现的复杂任务在少样本或零样本情况下的能力。
 
-<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 ### 建模 Modeling <a href="#h_675827506_3" id="h_675827506_3"></a>
 

@@ -90,7 +90,7 @@ coverY: 135
 0040108B | call cruehead-crackme-3.40133C | 取[0x402008]最后4位倒序5678到EAX：38 37 36 00
 ```
 
-<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 将文件内容后4位倒序与sum值对比：
 
@@ -175,7 +175,7 @@ int main() {
 
 在x32dbg中分析，首先看到Createfile操作，然后检测文件内容长度（0xC通过校验），然后readfile，IDA中分析一下：
 
-<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1) (1).png" alt=""><figcaption></figcaption></figure>
 
 <figure><img src="../../.gitbook/assets/image (100).png" alt=""><figcaption></figcaption></figure>
 
@@ -291,7 +291,7 @@ int main(void) {
 
 ```
 
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../../.gitbook/assets/image (1).png" alt=""><figcaption></figcaption></figure>
 
 
 

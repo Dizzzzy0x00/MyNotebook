@@ -44,3 +44,23 @@ Baseline：SneakyPrompt, DACA, Ring-A-Bell&#x20;
 ### TurboFuzzLLM <a href="#title" id="title"></a>
 
 {% embed url="https://aclanthology.org/2025.naacl-industry.43/" %}
+
+## AgentFuzz
+
+{% embed url="https://www.usenix.org/conference/usenixsecurity25/presentation/liu-fengyu" %}
+
+{% embed url="https://github.com/LFYSec/AgentFuzz" %}
+
+专为检测大型语言模型（LLM）智能体中污点型漏洞（Taint-Style Vulnerabilities）（污点型漏洞，它允许恶意用户通过精心构造的自然语言提示（Prompt）污染安全敏感操作（Security-Sensitive Operations），可能导致代码注入、数据泄露甚至服务器被远程接管）的自动化框架
+
+一个真实漏洞案例（CVE-2024-5\*\*93）生动地展示了这一过程：攻击者通过一个包含print(1)载荷的提示，诱导智能体调用一个名为ElasticsearchPermissionCheck的工具，最终该载荷未经任何处理就被传入eval()函数，导致了代码注入
+
+（1）LLM辅助的种子生成：利用LLM的自然语言理解能力，解析代码中开发者意图，生成功能特定的初始种子提示；
+
+（2）多维度反馈驱动的种子调度：设计了一套包含语义、距离和惩罚评分的综合反馈机制，以智能地优先选择最有可能触发漏洞的高质量种子；
+
+（3）污点池引导的种子变异：采用功能变异器和参数变异器两种策略，对种子进行语义和逻辑层面的精准调整。
+
+在对20个广泛使用的开源LLM智能体应用的评估中，AgentFuzz成功发现了34个高风险的0-day漏洞，精确率达到100%，其性能比现有最先进的方法高出33倍。这些发现已获得23个CVE编号，充分证明了该方法的有效性和现实世界的巨大影响 。
+
+<figure><img src="../.gitbook/assets/951da6603236f7e078840a711f463316.png" alt=""><figcaption></figcaption></figure>
