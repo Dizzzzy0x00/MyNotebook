@@ -296,9 +296,11 @@ $$
 
 #### 多余度和唯一解距离
 
-<figure><img src="../.gitbook/assets/19df0ea7-371e-418a-a062-fd781bcbc532.png" alt=""><figcaption></figcaption></figure>
+<div><figure><img src="../.gitbook/assets/19df0ea7-371e-418a-a062-fd781bcbc532.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/6002c289-9e97-4f07-bf9d-2418c31ac505.png" alt=""><figcaption></figcaption></figure></div>
 
-<figure><img src="../.gitbook/assets/6002c289-9e97-4f07-bf9d-2418c31ac505.png" alt=""><figcaption></figcaption></figure>
+多余度： $$\mathbf{d}=\log_2|\mathbf{P}|-\mathbf{H}_\mathrm{L}，另一种形式：d_0=\frac{\log_2\lvert P\rvert-H_L}{\log_2\lvert P\rvert}=1-\frac{H_L}{\log_2\lvert P\rvert}$$
+
+唯一解距离： $$\mathbf{U_d=H(K)/d}=\frac{H(K)}{d_0\log_2\lvert P\rvert}$$
 
 当密码分析者所截获的密文字符数小于 $$U_d$$时，存在多个可能的解（存在伪密钥），但当所截获的密文字符数大于 $$U_d$$时，这种密码的破译问题理论上就存在唯一解。
 
@@ -312,9 +314,7 @@ $$
 
 密码体制的完全保密性是**针对唯密文攻击而言的**。一个完全保密密码体制并**不能保证它在已知明文攻击或选择明文攻击下也是安全的**。
 
-<figure><img src="../.gitbook/assets/ecc2d41d-4914-4ee5-9215-e4154448c5b4.png" alt=""><figcaption></figcaption></figure>
-
-<figure><img src="../.gitbook/assets/5f5b56b7-9439-4fb3-8e7d-84fcb387b132.png" alt=""><figcaption></figcaption></figure>
+<div><figure><img src="../.gitbook/assets/ecc2d41d-4914-4ee5-9215-e4154448c5b4.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/5f5b56b7-9439-4fb3-8e7d-84fcb387b132.png" alt=""><figcaption></figcaption></figure></div>
 
 理想保密性（Ideal Secrecy ）：\
 定义：当一个密码体制的**唯一解距离** $$U_d$$**趋向于无穷大**时，该密码体制就称为具有理想保密性。
@@ -371,4 +371,12 @@ $$
 
 <div><figure><img src="../.gitbook/assets/57589dad-04b1-4121-bf9d-a3561bc8b83c.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/321f45ac-9e23-4e7e-a0a0-4cd09e71f219.png" alt=""><figcaption></figcaption></figure></div>
 
-最后的解密输出为： ，即加密输入的明文分组
+<figure><img src="../.gitbook/assets/814a11ed-5828-4fa2-b614-4bba2661f9ba.png" alt=""><figcaption></figcaption></figure>
+
+#### 数据加密标准DES、三重DES, IDEA, AES，SM4等算法原理与基本特性
+
+<table><thead><tr><th width="78.13334655761719">算法</th><th width="91.4666748046875">设计结构</th><th width="101.86669921875">分组</th><th width="90.6666259765625">密钥长</th><th width="81.06671142578125">轮数</th><th>核心运算 </th><th>主要特点</th></tr></thead><tbody><tr><td><strong>DES</strong></td><td>Feistel </td><td>64 bit</td><td>56 bit（有效）</td><td>16 轮</td><td>置换、S 盒替换、异或与循环移位</td><td>结构经典，安全性不足，易受暴力破解</td></tr><tr><td><strong>3DES</strong></td><td>Feistel </td><td>64 bit</td><td>112 / 168 bit</td><td>48 轮</td><td>DES 运算重复（EDE/EEE）</td><td>提高安全性但效率低，逐步淘汰</td></tr><tr><td><strong>IDEA</strong></td><td>非 Feistel </td><td>64 bit</td><td>128 bit</td><td>8.5 轮</td><td>模加、模乘、异或</td><td>代数结构复杂，抗差分/线性分析</td></tr><tr><td><strong>AES</strong></td><td>SPN </td><td>128 bit</td><td>128 / 192 / 256 bit</td><td>10 / 12 / 14 轮</td><td>S 盒、行移位、列混合、轮密钥加</td><td>高效、安全、应用最广</td></tr><tr><td><strong>SM4</strong></td><td>Feistel 变种</td><td>128 bit</td><td>128 bit</td><td>32 轮</td><td>S 盒、线性变换、异或</td><td>国家商用密码，适合软硬件实现</td></tr></tbody></table>
+
+DES：
+
+<div><figure><img src="../.gitbook/assets/2f7f6436-17e1-498e-8a46-e3483a610abe.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/17c3a0d4-3102-4289-b9a5-77bd5cd89dcd.png" alt=""><figcaption></figcaption></figure></div>
