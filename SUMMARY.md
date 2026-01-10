@@ -20,8 +20,9 @@
 * [NISP二级\&hvv](course/nisp-er-ji-hvv.md)
 * [Assembly Language Notebook](course/assembly-language-notebook.md)
 * [Web攻击检测](course/web-gong-ji-jian-ce.md)
-* [Crypto and application-1](course/crypto-and-application-1/README.md)
-  * [密码学中的数学](course/crypto-and-application-1/mi-ma-xue-zhong-de-shu-xue.md)
+* [Crypto and application-1](course/crypto-and-application-1.md)
+* [Crypto and application-2](course/crypto-and-application-2.md)
+* [密码学中的数学](course/mi-ma-xue-zhong-de-shu-xue.md)
 
 ## vulnerability detection
 

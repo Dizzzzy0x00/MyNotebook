@@ -1,3 +1,7 @@
+---
+description: 密码技术及应用
+---
+
 # Crypto and application-1
 
 ## CH1 密码技术概述
@@ -6,9 +10,7 @@
 
 是信息的机密性、完整性、鉴别和不可抵赖性等信息安全问题相关的一门学科
 
-<figure><img src="../../.gitbook/assets/0d7e1ab4-4ab9-47af-8c7b-7d8f4107e4ac.png" alt=""><figcaption></figcaption></figure>
-
-<figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
+<div><figure><img src="../.gitbook/assets/0d7e1ab4-4ab9-47af-8c7b-7d8f4107e4ac.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure></div>
 
 #### 密码系统的安全条件
 
@@ -29,21 +31,19 @@ Kerckhoffs原则（柯克霍夫斯原则）：一切秘密寓于密钥之中
 
 ④加密和解密算法能有效地计算，密码系统易于实现和使用。
 
-<figure><img src="../../.gitbook/assets/3d25bcea-9a76-41a0-81c2-8034de1484b2.png" alt=""><figcaption></figcaption></figure>
+<div><figure><img src="../.gitbook/assets/3d25bcea-9a76-41a0-81c2-8034de1484b2.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/4dd7dcb4fd65a74ace539e2f3f0e43e3.png" alt=""><figcaption></figcaption></figure></div>
 
-<figure><img src="../../.gitbook/assets/4dd7dcb4fd65a74ace539e2f3f0e43e3.png" alt=""><figcaption></figcaption></figure>
-
-<figure><img src="../../.gitbook/assets/3ed55115-8695-48b1-8967-e8370e8dc0d1.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/3ed55115-8695-48b1-8967-e8370e8dc0d1.png" alt="" width="563"><figcaption></figcaption></figure>
 
 #### 两种保密通信模型
 
-<figure><img src="../../.gitbook/assets/83e1b213-90bb-4a7e-b5e7-fcfd8a150b66.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/83e1b213-90bb-4a7e-b5e7-fcfd8a150b66.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/fcd8ddc4-eac4-419f-8b16-9bcff22335e5.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/fcd8ddc4-eac4-419f-8b16-9bcff22335e5.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/266a2d91-626f-4524-9d66-219604c75505.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/266a2d91-626f-4524-9d66-219604c75505.png" alt=""><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/270e1314-613c-45ca-997d-cf8c61d08636.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/270e1314-613c-45ca-997d-cf8c61d08636.png" alt=""><figcaption></figcaption></figure>
 
 #### 对密码系统的两种攻击类型：主动攻击与被动攻击
 
@@ -63,26 +63,24 @@ Kerckhoffs原则（柯克霍夫斯原则）：一切秘密寓于密钥之中
 
 根据密码分析者对明文、密文等数据资源的掌握程度可以分为四类分析攻击：
 
-<figure><img src="../../.gitbook/assets/dafa59e3-785a-4b7c-aec2-2c8e8da2cccf.png" alt=""><figcaption></figcaption></figure>
-
-<figure><img src="../../.gitbook/assets/a1a30d1e-0896-4f97-be39-41e3d2d3f1fa.png" alt=""><figcaption></figcaption></figure>
+<div><figure><img src="../.gitbook/assets/dafa59e3-785a-4b7c-aec2-2c8e8da2cccf.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/a1a30d1e-0896-4f97-be39-41e3d2d3f1fa.png" alt=""><figcaption></figcaption></figure></div>
 
 #### 密码算法的分类
 
 *   根据密码算法功能分类
 
-    <figure><img src="../../.gitbook/assets/6bca2538-6929-40b5-b235-ce7e7a96862e.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../.gitbook/assets/6bca2538-6929-40b5-b235-ce7e7a96862e.png" alt=""><figcaption></figcaption></figure>
 *   根据密码算法密钥数量
 
-    <figure><img src="../../.gitbook/assets/59b9cbc7-1807-44a6-9abc-057cb7807255.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../.gitbook/assets/59b9cbc7-1807-44a6-9abc-057cb7807255.png" alt=""><figcaption></figcaption></figure>
 *   &#x20;根据对明文信息的处理方式
 
-    <div data-full-width="true"><figure><img src="../../.gitbook/assets/3f085091-74ee-4610-9a5e-78d6f38c6e38.png" alt=""><figcaption></figcaption></figure></div>
+    <div data-full-width="true"><figure><img src="../.gitbook/assets/3f085091-74ee-4610-9a5e-78d6f38c6e38.png" alt=""><figcaption></figcaption></figure></div>
 
-    <figure><img src="../../.gitbook/assets/290f726a-1391-42b8-8b7d-d635b08102bc.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../.gitbook/assets/290f726a-1391-42b8-8b7d-d635b08102bc.png" alt=""><figcaption></figcaption></figure>
 *   其他分类方式
 
-    <figure><img src="../../.gitbook/assets/3cb84ff9-6ebe-4ed7-ba7e-1462a6ffd3f0.png" alt=""><figcaption></figcaption></figure>
+    <figure><img src="../.gitbook/assets/3cb84ff9-6ebe-4ed7-ba7e-1462a6ffd3f0.png" alt=""><figcaption></figcaption></figure>
 
 
 
@@ -123,11 +121,11 @@ $$
 
 #### 对称密码体制和非对称密码体制
 
-<figure><img src="../../.gitbook/assets/24e2ee22-eaf7-46bc-b2ce-9b91f83bdf2f (1).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/24e2ee22-eaf7-46bc-b2ce-9b91f83bdf2f (1).png" alt=""><figcaption></figcaption></figure>
 
 #### 针对不同功能密码算法的攻击目标
 
-<figure><img src="../../.gitbook/assets/537bdfdd-c4ba-432c-897e-fe36527550cc.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/537bdfdd-c4ba-432c-897e-fe36527550cc.png" alt=""><figcaption></figcaption></figure>
 
 | 密码功能      | 核心安全目标    | 攻击目标             |
 | --------- | --------- | ---------------- |
@@ -154,18 +152,18 @@ $$
 * 同一明文字母在不同位置可能被替换为不同密文字母
 * 例如：维吉尼亚密码
 
-<figure><img src="../../.gitbook/assets/31c58336-f702-4fe0-b232-039aaa9b53fb.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/31c58336-f702-4fe0-b232-039aaa9b53fb.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<div data-full-width="true"><figure><img src="../../.gitbook/assets/fa4b8085-ebd4-40ba-a0b9-01e2e77a9dd1.png" alt="" width="563"><figcaption></figcaption></figure></div>
+<div data-full-width="true"><figure><img src="../.gitbook/assets/fa4b8085-ebd4-40ba-a0b9-01e2e77a9dd1.png" alt="" width="563"><figcaption></figcaption></figure></div>
 
 置换密码：
 
 * 栅栏密码（Rail Fence Cipher）
 * 列置换密码（Columnar Transposition Cipher）
 
-<figure><img src="../../.gitbook/assets/a8af2de8-dc86-4056-b289-731c155f0797.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/a8af2de8-dc86-4056-b289-731c155f0797.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/e1794591-cca7-4ed6-9c27-857aeb210200.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/e1794591-cca7-4ed6-9c27-857aeb210200.png" alt="" width="563"><figcaption></figcaption></figure>
 
 | 对比维度    | 替换密码   | 置换密码 |
 | ------- | ------ | ---- |
@@ -214,27 +212,27 @@ $$
 
 #### 维吉利亚(Vigenère)、 Playfair算法计算方法和特性
 
-<figure><img src="../../.gitbook/assets/b4fb3fa1-71e0-4ffc-a561-1863131dae37.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/b4fb3fa1-71e0-4ffc-a561-1863131dae37.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/bd6fe8e2-7e8f-4e7b-9dd7-7a7e4b078403.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/bd6fe8e2-7e8f-4e7b-9dd7-7a7e4b078403.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<div><figure><img src="../../.gitbook/assets/2b48eb49-3794-4798-a9be-6a70d6812125.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/72ebe9e1-cee0-418d-8d97-9007420b60e3.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/2b48eb49-3794-4798-a9be-6a70d6812125.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/72ebe9e1-cee0-418d-8d97-9007420b60e3.png" alt=""><figcaption></figcaption></figure></div>
 
-<div><figure><img src="../../.gitbook/assets/74c8a284-dad9-405a-b9a2-ee5046672165.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/27d736b2-a54b-4a2d-bc08-a0353ece32eb.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/74c8a284-dad9-405a-b9a2-ee5046672165.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/27d736b2-a54b-4a2d-bc08-a0353ece32eb.png" alt=""><figcaption></figcaption></figure></div>
 
-<figure><img src="../../.gitbook/assets/5a116aa8-deec-4708-9bde-8d605e2880e1.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/5a116aa8-deec-4708-9bde-8d605e2880e1.png" alt="" width="563"><figcaption></figcaption></figure>
 
 #### Hill密码的特性与计算方法
 
-<figure><img src="../../.gitbook/assets/1ed8b17d-4cab-4490-a8c1-7e9d53cb2575.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/1ed8b17d-4cab-4490-a8c1-7e9d53cb2575.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/a1b64adc-12d9-4bde-9d17-4517db713cb6.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/a1b64adc-12d9-4bde-9d17-4517db713cb6.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/4e767151-523f-4114-b4f9-f568dcd717bb.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/4e767151-523f-4114-b4f9-f568dcd717bb.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/378442fa-0234-44b9-81f1-3211502aa0ef.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/378442fa-0234-44b9-81f1-3211502aa0ef.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<div><figure><img src="../../.gitbook/assets/3cf610ed-5ea3-483a-9b38-194488988fb3.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/1aff6f7d-d941-4c87-870e-88361110eee4.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/3cf610ed-5ea3-483a-9b38-194488988fb3.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/1aff6f7d-d941-4c87-870e-88361110eee4.png" alt=""><figcaption></figcaption></figure></div>
 
 #### 转轮机密码、OTP等古典密码算法的原理与特点
 
@@ -290,17 +288,17 @@ $$
 
 #### 密码体制的数学模型
 
-<div><figure><img src="../../.gitbook/assets/84096244-33f8-4c59-a8ac-fe24e7b89638.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/27974c17-c142-4c6e-9312-6388c5b970ce.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/84096244-33f8-4c59-a8ac-fe24e7b89638.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/27974c17-c142-4c6e-9312-6388c5b970ce.png" alt=""><figcaption></figcaption></figure></div>
 
 #### 熵的概念与熵的特性
 
-<div><figure><img src="../../.gitbook/assets/976b0a9b-c492-4ede-946b-f78d3f4f14ce.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/9d0cc579-8894-42ad-9143-6aa7894ab3e6.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/976b0a9b-c492-4ede-946b-f78d3f4f14ce.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/9d0cc579-8894-42ad-9143-6aa7894ab3e6.png" alt=""><figcaption></figcaption></figure></div>
 
-<div><figure><img src="../../.gitbook/assets/86db5e66-663f-4e81-8c9a-e2dca903887b.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/image (103).png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/86db5e66-663f-4e81-8c9a-e2dca903887b.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/image (103).png" alt=""><figcaption></figcaption></figure></div>
 
 #### 多余度和唯一解距离
 
-<div><figure><img src="../../.gitbook/assets/19df0ea7-371e-418a-a062-fd781bcbc532.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/6002c289-9e97-4f07-bf9d-2418c31ac505.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/19df0ea7-371e-418a-a062-fd781bcbc532.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/6002c289-9e97-4f07-bf9d-2418c31ac505.png" alt=""><figcaption></figcaption></figure></div>
 
 多余度： $$\mathbf{d}=\log_2|\mathbf{P}|-\mathbf{H}_\mathrm{L}，另一种形式：d_0=\frac{\log_2\lvert P\rvert-H_L}{\log_2\lvert P\rvert}=1-\frac{H_L}{\log_2\lvert P\rvert}$$
 
@@ -318,12 +316,12 @@ $$
 
 密码体制的完全保密性是**针对唯密文攻击而言的**。一个完全保密密码体制并**不能保证它在已知明文攻击或选择明文攻击下也是安全的**。
 
-<div><figure><img src="../../.gitbook/assets/ecc2d41d-4914-4ee5-9215-e4154448c5b4.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/5f5b56b7-9439-4fb3-8e7d-84fcb387b132.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/ecc2d41d-4914-4ee5-9215-e4154448c5b4.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/5f5b56b7-9439-4fb3-8e7d-84fcb387b132.png" alt=""><figcaption></figcaption></figure></div>
 
 理想保密性（Ideal Secrecy ）：\
 定义：当一个密码体制的**唯一解距离** $$U_d$$**趋向于无穷大**时，该密码体制就称为具有理想保密性。
 
-<figure><img src="../../.gitbook/assets/f7119247-a0a2-4633-bd7e-8cc1735dd844.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/f7119247-a0a2-4633-bd7e-8cc1735dd844.png" alt="" width="563"><figcaption></figcaption></figure>
 
 #### 扩散与扰乱原理&#xD;
 
@@ -332,16 +330,11 @@ $$
 
 #### 乘积密码体制
 
-对于幂等密码，有:
-
-$$
-对 m\in M,\forall k_1,k_2\in K,\exists k_3\in K,
-满足：E_{k_2}(E_{k_1}(m))=E_{k_3}(m)
-$$
+对于幂等密码，有: $$对 m\in M,\forall k_1,k_2\in K,\exists k_3\in K, 满足：E_{k_2}(E_{k_1}(m))=E_{k_3}(m)$$
 
 **迭代密码体制必须使用非幂等密码体制。**
 
-<div><figure><img src="../../.gitbook/assets/0393ae9a-a272-4a62-b936-3a274d75a505.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/1c99b68b-7244-4f11-b6b5-1adefb2074d8.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/0393ae9a-a272-4a62-b936-3a274d75a505.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/1c99b68b-7244-4f11-b6b5-1adefb2074d8.png" alt=""><figcaption></figcaption></figure></div>
 
 ## CH-3 对称密码技术
 
@@ -367,13 +360,13 @@ $$
 
 #### 分组密码的两种基本结构SPN，Feistel、分组密码原理与概念
 
-<figure><img src="../../.gitbook/assets/113de309917114c7b80aad0668292949.png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/113de309917114c7b80aad0668292949.png" alt="" width="375"><figcaption></figcaption></figure>
 
-<div><figure><img src="../../.gitbook/assets/624431ab-4a31-4e0a-91bd-fe98bfe33f52.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/891a008a-610e-49fb-8d33-16017b069e41.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/624431ab-4a31-4e0a-91bd-fe98bfe33f52.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/891a008a-610e-49fb-8d33-16017b069e41.png" alt=""><figcaption></figcaption></figure></div>
 
-<div><figure><img src="../../.gitbook/assets/a356f335-f179-4ee3-8b5a-12983e854046.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/57589dad-04b1-4121-bf9d-a3561bc8b83c.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/a356f335-f179-4ee3-8b5a-12983e854046.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/57589dad-04b1-4121-bf9d-a3561bc8b83c.png" alt=""><figcaption></figcaption></figure></div>
 
-<div><figure><img src="../../.gitbook/assets/321f45ac-9e23-4e7e-a0a0-4cd09e71f219.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/814a11ed-5828-4fa2-b614-4bba2661f9ba.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/321f45ac-9e23-4e7e-a0a0-4cd09e71f219.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/814a11ed-5828-4fa2-b614-4bba2661f9ba.png" alt=""><figcaption></figcaption></figure></div>
 
 #### 数据加密标准DES、三重DES, IDEA, AES，SM4等算法原理与基本特性
 
@@ -381,19 +374,21 @@ $$
 
 DES：
 
-<figure><img src="../../.gitbook/assets/2f7f6436-17e1-498e-8a46-e3483a610abe.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/2f7f6436-17e1-498e-8a46-e3483a610abe.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/17c3a0d4-3102-4289-b9a5-77bd5cd89dcd.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/17c3a0d4-3102-4289-b9a5-77bd5cd89dcd.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/e632e8fa-8c53-4cb9-b288-a2d7720a1815.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/e632e8fa-8c53-4cb9-b288-a2d7720a1815.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/479801c0-4815-4b14-89b9-4957a6e8fd73.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/479801c0-4815-4b14-89b9-4957a6e8fd73.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/cb4ff2ee-2323-4749-994f-f21c819c1261.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/cb4ff2ee-2323-4749-994f-f21c819c1261.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<div><figure><img src="../../.gitbook/assets/55b643e9-5c7d-4f16-a911-79a9cf8c2517.png" alt=""><figcaption></figcaption></figure> <figure><img src="../../.gitbook/assets/84f13f4c-124a-41be-97fe-d8abbd95deca.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/55b643e9-5c7d-4f16-a911-79a9cf8c2517.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/84f13f4c-124a-41be-97fe-d8abbd95deca.png" alt=""><figcaption></figcaption></figure></div>
 
 利用DES算法的互补对称性,利用选择明文进行穷举攻击时可将密钥的加密测试量**降低一半**
+
+<figure><img src="../.gitbook/assets/87ca8321-ca83-4d3e-a8db-aae6b79243c4.png" alt="" width="563"><figcaption></figcaption></figure>
 
 #### 分组密码的操作方式及特点
 
@@ -401,23 +396,23 @@ DES：
 
 * ECB：**独立加密每个块**
 
-<figure><img src="../../.gitbook/assets/6ed4e88e-fd33-466b-a6ea-86bbab773f4a.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/6ed4e88e-fd33-466b-a6ea-86bbab773f4a.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/deb02349-80f4-4573-a063-5b7fe238d52c.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/deb02349-80f4-4573-a063-5b7fe238d52c.png" alt="" width="563"><figcaption></figcaption></figure>
 
 * CBC：**每个块与前一个密文块异或**
 
-<figure><img src="../../.gitbook/assets/8e720f8a-fadc-4a90-b05b-93a21a5d5486.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/8e720f8a-fadc-4a90-b05b-93a21a5d5486.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/aee3a530-cd0e-4d03-aac5-bd44b8bb30e2.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/aee3a530-cd0e-4d03-aac5-bd44b8bb30e2.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/ac198d9f-61ed-41aa-a8bd-d4e917485aaf.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/ac198d9f-61ed-41aa-a8bd-d4e917485aaf.png" alt="" width="563"><figcaption></figcaption></figure>
 
 * CFB：**将分组密码转换为流密码**
 
-<figure><img src="../../.gitbook/assets/image (104).png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (104).png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/27501202-5864-4a8b-aac4-1341d84d283a.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/27501202-5864-4a8b-aac4-1341d84d283a.png" alt="" width="563"><figcaption></figcaption></figure>
 
 特点：
 
@@ -432,13 +427,13 @@ CFB 模式由于采用反馈结构，加解密过程中都必须顺序调用分�
 
 * OFB：**生成密钥流与明文异或**
 
-<figure><img src="../../.gitbook/assets/191598b2-ce2f-44a4-87da-05b240616b59.png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/191598b2-ce2f-44a4-87da-05b240616b59.png" alt="" width="563"><figcaption></figcaption></figure>
 
-<figure><img src="../../.gitbook/assets/ed091406-a131-4e22-b821-22c26502e210.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/ed091406-a131-4e22-b821-22c26502e210.png" alt="" width="563"><figcaption></figcaption></figure>
 
 * **计数器模式（CTR）：用计数器生成密钥流**
 
-<figure><img src="../../.gitbook/assets/dd803f57-583a-4227-9f0b-9ff438773c13.png" alt="" width="563"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/dd803f57-583a-4227-9f0b-9ff438773c13.png" alt="" width="563"><figcaption></figcaption></figure>
 
 * 特点：
   * 处理效率高，可进行并行处理，提高数据吞吐量；
@@ -447,7 +442,7 @@ CFB 模式由于采用反馈结构，加解密过程中都必须顺序调用分�
   * 实现简单，加、解密阶段都只涉及加密函数。    （这点与ECB和CBC模式不同）。
 *  **密文窃取模式CSM（Ciphertext Stealing Mode）**
 
-<figure><img src="../../.gitbook/assets/80b0dbed-7d4b-4585-b9dd-f7800202d6da.png" alt="" width="375"><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/80b0dbed-7d4b-4585-b9dd-f7800202d6da.png" alt="" width="375"><figcaption></figcaption></figure>
 
 | 特性       | ECB | CBC   | CFB | OFB | CTR   |
 | -------- | --- | ----- | --- | --- | ----- |
@@ -457,10 +452,3 @@ CFB 模式由于采用反馈结构，加解密过程中都必须顺序调用分�
 | **错误传播** | 1块  | 后续所有块 | 8字节 | 无   | 无     |
 | **IV要求** | 无   | 唯一    | 唯一  | 唯一  | 唯一计数器 |
 | **安全等级** | 低   | 中     | 中   | 中   | 高     |
-
-
-
-
-
-
-
