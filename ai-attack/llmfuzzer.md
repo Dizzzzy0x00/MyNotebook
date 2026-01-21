@@ -51,10 +51,6 @@ Baseline：SneakyPrompt, DACA, Ring-A-Bell&#x20;
 
 {% embed url="https://github.com/LFYSec/AgentFuzz" %}
 
-专为检测大型语言模型（LLM）智能体中污点型漏洞（Taint-Style Vulnerabilities）（污点型漏洞，它允许恶意用户通过精心构造的自然语言提示（Prompt）污染安全敏感操作（Security-Sensitive Operations），可能导致代码注入、数据泄露甚至服务器被远程接管）的自动化框架
-
-一个真实漏洞案例（CVE-2024-5\*\*93）生动地展示了这一过程：攻击者通过一个包含print(1)载荷的提示，诱导智能体调用一个名为ElasticsearchPermissionCheck的工具，最终该载荷未经任何处理就被传入eval()函数，导致了代码注入
-
 （1）LLM辅助的种子生成：利用LLM的自然语言理解能力，解析代码中开发者意图，生成功能特定的初始种子提示；
 
 （2）多维度反馈驱动的种子调度：设计了一套包含语义、距离和惩罚评分的综合反馈机制，以智能地优先选择最有可能触发漏洞的高质量种子；

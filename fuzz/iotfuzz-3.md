@@ -63,8 +63,8 @@ layout:
 
 第一步：攻击者发送恶意 ONVIF 配置请求数据包包含如`SetVideoEncoderConfiguration` / `SetSystemDateAndTime` 或类似的 ONVIF 配置操作的字段
 
-* 这些字段允许字符串内容（如 Encoder name、Profile name）。
-* 字段内容未严格验证。
+* 这些字段允许字符串内容（如 Encoder name、Profile name）
+* 字段内容未严格验证
 * 攻击者塞入恶意 payload，例如：`$(sleep 9999)` 或者`; reboot;`
 
 ONVIF 守护进程把这些字段写入一个 **全局结构体 global\_config\_struct** 里。**这个结构体稍后会被其他模块读取。**
@@ -73,7 +73,7 @@ ONVIF 守护进程把这些字段写入一个 **全局结构体 global\_config\_
 
 * 访问 Web 管理界面 CGI，如\
   `/param.cgi?action=update&...`
-* 此操作会调用 firmware 中的函数（论文说是 `check_para()`）。
+* 此操作会调用 firmware 中的函数（论文说是 `check_para()`）
   * 它会从之前的**同一个全局结构体**中读取 encoder 配置字段。
   * 然后执行类似：`popen(global_config_struct->encoder_name, "r");`
 * 如果这个字段是：`$(sleep 9999)` 或`; busybox reboot ;`，就会**直接通过 popen 执行命令**。
@@ -156,3 +156,28 @@ IOTHunter设计的模型 $$G=（S，M）$$（如下图所示）， $$S =< s_0, s
   * 已知状态模糊: 从初始状态 s0 开始，基于消息种子直接生成新的消息。然后，当任何违反格式要求的情况发生时更新消息格式。在将新消息发送到目标物联网固件之后，如果新消息有效，那么将实现下一个状态 s1，并且我们收集有效消息 $$M_{0, 1}$$。否则，当前状态将丢失并重置为 s0。经过一段时间的模糊处理后，如果没有找到新的路径，将继续进入下一个状态。对于每个步骤中的状态 si (i > 0) 的模糊化，首先需要检查当前状态，如果不是 si-1，则从有效消息集 中选择附加消息 $$Mi = m_{0,1} + M_{1,2} + ... + M_{i-2}$$，i-1 用于将当前状态调度到 si-1
   * 未知状态模糊：在变异过程中，如果能发现状态序列中没有的状态，就把当前消息序列以及状态序列加入输入库之中。
 * 格式检测:在fuzzing过程中，每个消息在发送之前根据协议格式要求进行检查。基于特定于协议的解析器，提取并存储每条消息的元数据。然后，检查元数据是否保留消息验证。例如，新消息的长度被重新计算并写入长度字段。同时，消息类型必须与当前状态一致。
+
+物联网设备配置修改
+
+* IP 摄像头等物联网设备通常有内置 Web 界面或者 HTTP API，可以通过 GET/POST 请求修改配置。
+* 常见端点：
+  * `/config.cgi`
+  * `/set_param.cgi`
+  * `/admin.cgi`
+  * `/action.cgi`
+* 请求数据可能是：
+  * URL 参数（GET 请求）
+  * 表单数据（POST 请求，`application/x-www-form-urlencoded` 或 `multipart/form-data`）
+  * JSON/XML 结构（某些新型号使用 REST API）
+
+**特点：**
+
+* 配置即时生效（通常写入设备内存/Flash）
+* 网络抓包工具如 Wireshark 或 Burp Suite 可以看到配置包的内容
+* 利用漏洞（比如命令注入或越权访问）可能通过特定参数修改系统级配置
+
+#### OptionFuzz: The Fuzzer with Coverage-Guided Dynamic Configuration Scheduling
+
+{% embed url="https://ieeexplore.ieee.org/document/11069832" %}
+
+<figure><img src="../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
