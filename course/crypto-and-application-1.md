@@ -10,7 +10,7 @@ description: 密码技术及应用
 
 是信息的机密性、完整性、鉴别和不可抵赖性等信息安全问题相关的一门学科
 
-<div><figure><img src="../.gitbook/assets/0d7e1ab4-4ab9-47af-8c7b-7d8f4107e4ac.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure></div>
+<div><figure><img src="../.gitbook/assets/0d7e1ab4-4ab9-47af-8c7b-7d8f4107e4ac.png" alt=""><figcaption></figcaption></figure> <figure><img src="../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure></div>
 
 #### 密码系统的安全条件
 

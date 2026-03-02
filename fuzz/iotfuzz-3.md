@@ -1,20 +1,3 @@
----
-layout:
-  width: wide
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
-  metadata:
-    visible: true
----
-
 # iotFuzz-3
 
 ## IP摄像头
@@ -180,4 +163,4 @@ IOTHunter设计的模型 $$G=（S，M）$$（如下图所示）， $$S =< s_0, s
 
 {% embed url="https://ieeexplore.ieee.org/document/11069832" %}
 
-<figure><img src="../.gitbook/assets/image (8).png" alt=""><figcaption></figcaption></figure>
+<figure><img src="../.gitbook/assets/image (8) (1).png" alt=""><figcaption></figcaption></figure>

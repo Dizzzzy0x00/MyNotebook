@@ -1,20 +1,3 @@
----
-layout:
-  width: wide
-  title:
-    visible: true
-  description:
-    visible: true
-  tableOfContents:
-    visible: true
-  outline:
-    visible: true
-  pagination:
-    visible: true
-  metadata:
-    visible: true
----
-
 # iotFuzz-1
 
 ## 背景
@@ -527,3 +510,6 @@ main()
 * 重复多次尝试；
 * 在 SOAP/HNAP/HTTP/SSDP 请求中嵌入不同变体 payload；
 * 持续观察 QEMU 是否崩溃或输出异常
+
+
+
