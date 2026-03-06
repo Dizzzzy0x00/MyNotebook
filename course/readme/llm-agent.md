@@ -6,6 +6,15 @@ Agent = LLM (大脑) + Planning (规划) + Tool use (执行) + Memory (记忆)
 
 <figure><img src="../../.gitbook/assets/image.png" alt=""><figcaption></figcaption></figure>
 
+智能体（Agent）是一种能够感知环境并自主决策、执行行动以完成特定目标的智能系统。其工作流程如图所示：
+
+1. 用户发出指令
+2. 智能体拼接用户与系统指令并发给大模型
+3. 智能体解析大模型返回并调用相应工具
+4. 最终将执行结果返回给用户
+
+<figure><img src="../../.gitbook/assets/e82b2c8666ae9e695fd0230a141a179d.png" alt=""><figcaption></figcaption></figure>
+
 Agent简易代码实现
 
 ```python

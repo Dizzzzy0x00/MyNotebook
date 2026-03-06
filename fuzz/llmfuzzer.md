@@ -47,6 +47,8 @@ Baseline：SneakyPrompt, DACA, Ring-A-Bell&#x20;
 
 ## AgentFuzz
 
+{% embed url="https://mp.weixin.qq.com/s/kIfa5d6r-MUXJOClfUMBGw" %}
+
 {% embed url="https://www.usenix.org/conference/usenixsecurity25/presentation/liu-fengyu" %}
 
 {% embed url="https://github.com/LFYSec/AgentFuzz" %}
@@ -60,3 +62,29 @@ Baseline：SneakyPrompt, DACA, Ring-A-Bell&#x20;
 在对20个广泛使用的开源LLM智能体应用的评估中，AgentFuzz成功发现了34个高风险的0-day漏洞，精确率达到100%，其性能比现有最先进的方法高出33倍。这些发现已获得23个CVE编号，充分证明了该方法的有效性和现实世界的巨大影响 。
 
 <figure><img src="../.gitbook/assets/951da6603236f7e078840a711f463316.png" alt=""><figcaption></figcaption></figure>
+
+<figure><img src="../.gitbook/assets/22d84028d5540eac33d198d915d0a99e.png" alt=""><figcaption></figcaption></figure>
+
+#### 阶段一：LLM辅助的种子生成
+
+污点池与调用链提取：流程始于静态分析。AgentFuzz**使用CodeQL扫描目标智能体的源代码，识别出预定义的安全敏感函数（“污点池”）**，例如eval、subprocess.run等，从这些“污点池”出发，向后追溯调用图，提取出所有能够到达这些危险函数的调用链。例如，它可能会发现一条路径为：eval ← ElasticsearchPermissionCheck.similarity\_search
+
+Agentfuzz注意到，像ElasticsearchPermissionCheck.similarity\_search这样的调用链名称往往是开发者用来描述其功能的自然语言短语，将这些提取出的调用链信息，喂给一个LLM，并采用单样本学习（One-shot learning）和思维链（Chain of Thought, CoT）提示策略进行引导 ，从而生成高质量、功能特定的初始种子，例如：“Use Elasticsearch for a similarity search with permission checks to find documents with 'source\_doc:print(1)'”&#x20;
+
+#### 阶段二：反馈驱动的种子调度
+
+AgentFuzz提出了一个多维度评分函数：_**Fs=αSs+βDs−Ps**_
+
+1. 语义分数 (Ss)：这是对传统方法的最大突破。当一个种子被执行后，AgentFuzz会**记录其动态执行轨迹（即实际调用的类和方法序列）**。然后，它再次利用LLM，要求其**比较这条实际执行轨迹的语义与目标漏洞调用链的语义之间的相似度**。例如，如果目标是ElasticsearchPermissionCheck，而种子实际触发了Elasticsearch，那么尽管没有命中目标，但LLM会认为它们在语义上高度相关，并给予较高的分数。反之，如果触发了风马牛不相及的Calculator组件，则分数会很低。这样模糊测试器能够识别出那些“正在取得进展”的种子
+2. 距离分数 (Ds)：这是一个较为传统的度量，作为语义分数的补充。对于执行轨迹中能够被静态分析映射到CFG的部分，AgentFuzz会计算其中距离目标“污点池”最近的基本块的路径长度。距离越短，分数越高。其计算公式为 Ds(x)=x−k，其中 x 是最短距离 。  &#x20;
+3. 惩罚分数 (Ps)：为了避免陷入局部最优（例如，反复变异一个看起来不错但实际上无法突破的种子），AgentFuzz引入了惩罚机制。每当一个种子或其对应的调用链被选中时，其惩罚分数就会增加，从而降低其在下一轮被选中的概率，公式为 Ps=γSf+ηCf 。
+
+#### 阶段三：污点池引导的种子变异
+
+当一个高质量的种子被选中后，AgentFuzz会根据运行时反馈，由LLM智能地调度两种专门的变异器之一，对其进行修改
+
+1. 功能变异器：如果反馈显示（例如，语义分数低），当前种子虽然有潜力，但其语义未能准确调用到目标组件，那么功能变异器就会被激活。它利用LLM的自我改进（Self-Improvement）机制，在一个独立的聊天会话中进行工作。LLM会被提供该种子的所有历史变异尝试、执行结果和反馈分数，并被要求分析失败的原因，然后对提示的自然语言措辞进行润色和修改，以更好地匹配目标组件的功能 。  &#x20;
+2. 参数变异器：如果反馈显示种子已经成功调用了正确的组件，但由于未能满足代码中的某个条件判断而卡在半路，那么参数变异器就会激活。参数变异器会进行约束识别（通过混合执行）和约束求解计算，最后进行提示-参数映射：
+   1. 约束识别（通过混合执行）：AgentFuzz对包含未满足条件的目标组件启动混合执行（Concolic Execution）。它将组件的参数视为符号变量，在具体执行的同时收集符号约束。通过对比实际执行路径和通往“污点池”的期望路径，它能精确定位到第一个未能满足的条件语句，例如 if "source\_doc" in content: 。  &#x20;
+   2. 约束求解：接着，它将收集到的符号约束（例如，“变量content必须包含子字符串"source\_doc"”）交给强大的Z3约束求解器。Z3会计算出一个能够满足该约束的具体值 。  &#x20;
+   3. 提示-参数映射：现在，变异器需要修改原始的自然语言提示，使得智能体在处理这个新提示时，LLM的输出恰好能生成Z3求解出的那个值。AgentFuzz通过最长公共子串匹配（LCSM）算法来实现这一点。它在原始提示中寻找与未满足约束的变量（content）的原始值最匹配的部分，然后用Z3求解出的新值精准地替换或修改提示的这一部分。

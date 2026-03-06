@@ -54,13 +54,13 @@
 * [iotFuzz-1](fuzz/iotfuzz-1.md)
 * [iotFuzz-2](fuzz/iotfuzz-2.md)
 * [iotFuzz-3](fuzz/iotfuzz-3.md)
+* [LLMFuzzer](fuzz/llmfuzzer.md)
 
 ## AI-Attack
 
 * [AI-Attack-NLP Attacks](ai-attack/ai-attack-nlp-attacks.md)
 * [AI-Attack-LLM Attacks](ai-attack/ai-attack-llm-attacks.md)
 * [AI-Attack-CV Attacks](ai-attack/ai-attack-cv-attacks.md)
-* [LLMFuzzer](ai-attack/llmfuzzer.md)
 * [Adversarial Testing  Tools of LLM](ai-attack/adversarial-testing-tools-of-llm.md)
 
 ## Rust
