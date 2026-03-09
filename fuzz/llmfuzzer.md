@@ -65,9 +65,23 @@ Baseline：SneakyPrompt, DACA, Ring-A-Bell&#x20;
 
 <figure><img src="../.gitbook/assets/22d84028d5540eac33d198d915d0a99e.png" alt=""><figcaption></figcaption></figure>
 
-#### 阶段一：LLM辅助的种子生成
+### 阶段一：LLM辅助的种子生成
 
 污点池与调用链提取：流程始于静态分析。AgentFuzz**使用CodeQL扫描目标智能体的源代码，识别出预定义的安全敏感函数（“污点池”）**，例如eval、subprocess.run等，从这些“污点池”出发，向后追溯调用图，提取出所有能够到达这些危险函数的调用链。例如，它可能会发现一条路径为：eval ← ElasticsearchPermissionCheck.similarity\_search
+
+#### 代码实现
+
+**预定义的“敏感函数/ sink”位置：**
+
+定义文件：call.qll 中的 predicate is\_sink(CallNode cn)，这里通过一系列或条件明确列出/匹配所有感兴趣的 sink（例如 eval、exec、subprocess.run、os.system、requests 的 get/post/request、数据库执行、模板渲染、Python REPL、GitLoader 等）。&#x20;
+
+辅助小工具：print\_function()（同文件）用于把调用节点格式化为可匹配字符串；通用黑名单与辅助函数在 util.qll:1（如 getStrFuncName()、locStr()、isIncludeLocation2()）中定义。 为什么这些就是“预定义的敏感函数”
+
+is\_sink 明确列出函数名、属性调用、模块对象检查和更复杂的模式（例如判断函数所在对象、DefinitionNode、调用链上下文等），因此 CodeQL 通过该谓词把源代码中符合这些模式的调用当作 sink。 调用链（call chain）如何被提取（CodeQL 层）
+
+源（source）定义与路径生成：在 call.qll中，class Source extends PyFunctionObject 使用 r\_calls(...)（递归调用搜索）和 is\_sink(...) 来找到到达 sink 的路径，并提供路径字符串方法 getPathStr()（把中间函数按顺序 concat 成 "A@file -> B@file -> ... -> sink@loc"）。 具体拼接/格式化：get\_sink\_location() / getlocStr() 把 sink 的文件+行列拼为 path$$start:col$$end:col 形式；print\_callchain() / getPathStr() 返回前缀深度 + 函数序列 + sink 定位（QL 查询把这个字符串写入 SARIF message.text）。 IF / 控制流位置提取：查询 get\_if.ql 使用 BasicBlock / TestBlock 与 edges\*() 跟踪控制流，concat 出每个 if-test 的 (functionName)#(locStr) 串（用于后续抽取 if 片段）。 数据流约束提取：查询 get\_dataflow\_str\_constraint.ql:1 使用 DataFlow/TaintTracking 规则找到与 sink 相关的字符串产生点，并把 print\_function(cn) + "#" + locStr(...) 用 \~ 拼接输出（供 DSC JSON 使用）。 SARIF → 运行时 JSON 的桥接（如何被后续脚本消费）
+
+auto\_analyze.py 运行上述 QL 查询并生成 SARIF（auto\_analyze.py）。 解析脚本（generate\_hook.py、generate\_if.py、generate\_dsc.py）按查询约定的分隔符解析 message.text（例如 @@, ->, \~, \$$），把 call chain、sink 定位、if 代码片段与 DSC 约束提取并写成 enter\_hook.json / oracle.json / \*-if.json / \*-dsc.json，供插桩和 fuzzer 使用（ generate\_hook.py、generate\_if.py、generate\_dsc.py）
 
 Agentfuzz注意到，像ElasticsearchPermissionCheck.similarity\_search这样的调用链名称往往是开发者用来描述其功能的自然语言短语，将这些提取出的调用链信息，喂给一个LLM，并采用单样本学习（One-shot learning）和思维链（Chain of Thought, CoT）提示策略进行引导 ，从而生成高质量、功能特定的初始种子，例如：“Use Elasticsearch for a similarity search with permission checks to find documents with 'source\_doc:print(1)'”&#x20;
 
@@ -88,3 +102,14 @@ AgentFuzz提出了一个多维度评分函数：_**Fs=αSs+βDs−Ps**_
    1. 约束识别（通过混合执行）：AgentFuzz对包含未满足条件的目标组件启动混合执行（Concolic Execution）。它将组件的参数视为符号变量，在具体执行的同时收集符号约束。通过对比实际执行路径和通往“污点池”的期望路径，它能精确定位到第一个未能满足的条件语句，例如 if "source\_doc" in content: 。  &#x20;
    2. 约束求解：接着，它将收集到的符号约束（例如，“变量content必须包含子字符串"source\_doc"”）交给强大的Z3约束求解器。Z3会计算出一个能够满足该约束的具体值 。  &#x20;
    3. 提示-参数映射：现在，变异器需要修改原始的自然语言提示，使得智能体在处理这个新提示时，LLM的输出恰好能生成Z3求解出的那个值。AgentFuzz通过最长公共子串匹配（LCSM）算法来实现这一点。它在原始提示中寻找与未满足约束的变量（content）的原始值最匹配的部分，然后用Z3求解出的新值精准地替换或修改提示的这一部分。
+
+#### 一些可以做的创新点
+
+*   污点池是基于预定义的敏感函数（代码中call.ql的下面这个函数中定义
+
+    ```
+    predicate is_sink(CallNode cn)
+    ```
+
+    ）这个可以考虑训练一个模型来判断敏感函数？
+
