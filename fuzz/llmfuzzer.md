@@ -116,7 +116,7 @@ AgentFuzz提出了一个多维度评分函数：_**Fs=αSs+βDs−Ps**_
 * 更多的python漏洞类型支持，论文中支持了污点型的漏洞！！
 * 对openclaw进行Fuzz！！
 
-
+源码结构：
 
 ## ChainFuzzer
 
@@ -163,3 +163,30 @@ candidate tool chains + 数据传播路径标注 + 依赖类型（direct / indir
 
 ### &#xD;模块三. Fuzzing + Oracle
 
+
+
+1. 静态分析（Static analysis）
+   * 目的：用 CodeQL 扫描目标程序，生成漏洞相关的调用链、触发条件和约束信息。
+   * 入口脚本：`auto_analyze.py`
+   * 相关文件：
+     * `config/__init__.py`：配置 CodeQL 数据库路径、查询目录、OPENAI\_API\_BASE/OPENAI\_API\_KEY 等
+     * `generate_hook.py`：从 SARIF 结果生成 `enter_hook.json` 和 `oracle.json`
+     * `generate_if.py`：从 SARIF 结果生成 `*-if.json`
+     * `generate_dsc.py`：从 SARIF 结果生成 `*-dsc.json`
+   * 输出结果：`output/<App>/oracle.json`、`output/<App>/<App>-if.json`、`output/<App>/enter_hook.json`、`output/<App>/<App>-dsc.json`
+2. 目标程序仪器化（Instrumentation）
+   * 目的：把生成的规则文件加载到目标应用中，运行时追踪调用栈、Hook、Oracle 触发情况。
+   * 关键文件：`trace/cetracer.py`
+   * 说明：将 `enter_hook.json`、`oracle.json`、`*-if.json` 复制到目标程序运行环境，并在目标代码里调用 `cetracer.start_ce_trace(...)`
+3. Fuzzing / 自动测试（Fuzzing）
+   * 目的：根据静态分析结果自动生成 payload，发送给目标 Agent，检测是否触发目标调用链。
+   * 入口脚本：`main.py`
+   * 批量运行：`batchmain.py` 会遍历 `output/<App>/oracle.json` 中的所有 call chain，逐个调用 `main.py`。
+   * 相关文件：
+     * `poc/poc_factory.py`：把应用名映射到 PoC 函数、容器名、生成的 JSON 文件路径
+     * `poc/<应用>/poc.py`：实现 `connect_with_auth(payload)`，负责将 payload 发送给目标 Agent（**浏览器模拟或直接请求**）
+     * `fuzzer.py`：核心 fuzzing 逻辑，计算候选 prompt、发送 payload、解析 call stack、判断是否触发目标
+     * `config/PromptTemplete.py`：用于生成和变异 prompt 的模板
+4. 结果输出
+   * `main.py` 会打印最终的“exploration successful”结果和最终 prompt
+   * `batchmain.py` 会把多个 call chain 结果输出到 `log/` 下的日志文件
