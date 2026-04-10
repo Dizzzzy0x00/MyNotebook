@@ -85,7 +85,7 @@ auto\_analyze.py 运行上述 QL 查询并生成 SARIF（auto\_analyze.py）。 
 
 Agentfuzz注意到，像ElasticsearchPermissionCheck.similarity\_search这样的调用链名称往往是开发者用来描述其功能的自然语言短语，将这些提取出的调用链信息，喂给一个LLM，并采用单样本学习（One-shot learning）和思维链（Chain of Thought, CoT）提示策略进行引导 ，从而生成高质量、功能特定的初始种子，例如：“Use Elasticsearch for a similarity search with permission checks to find documents with 'source\_doc:print(1)'”&#x20;
 
-#### 阶段二：反馈驱动的种子调度
+### 阶段二：反馈驱动的种子调度
 
 AgentFuzz提出了一个多维度评分函数：_**Fs=αSs+βDs−Ps**_
 
@@ -93,7 +93,7 @@ AgentFuzz提出了一个多维度评分函数：_**Fs=αSs+βDs−Ps**_
 2. 距离分数 (Ds)：这是一个较为传统的度量，作为语义分数的补充。对于执行轨迹中能够被静态分析映射到CFG的部分，AgentFuzz会计算其中距离目标“污点池”最近的基本块的路径长度。距离越短，分数越高。其计算公式为 Ds(x)=x−k，其中 x 是最短距离 。  &#x20;
 3. 惩罚分数 (Ps)：为了避免陷入局部最优（例如，反复变异一个看起来不错但实际上无法突破的种子），AgentFuzz引入了惩罚机制。每当一个种子或其对应的调用链被选中时，其惩罚分数就会增加，从而降低其在下一轮被选中的概率，公式为 Ps=γSf+ηCf 。
 
-#### 阶段三：污点池引导的种子变异
+### 阶段三：污点池引导的种子变异
 
 当一个高质量的种子被选中后，AgentFuzz会根据运行时反馈，由LLM智能地调度两种专门的变异器之一，对其进行修改
 
@@ -117,6 +117,34 @@ AgentFuzz提出了一个多维度评分函数：_**Fs=αSs+βDs−Ps**_
 * 对openclaw进行Fuzz！！
 
 源码结构：
+
+* 静态分析（Static analysis）
+  * 目的：用 CodeQL 扫描目标程序，生成漏洞相关的调用链、触发条件和约束信息。
+  * 入口脚本：`auto_analyze.py`
+  * 相关文件：
+    * `config/__init__.py`：配置 CodeQL 数据库路径、查询目录、OPENAI\_API\_BASE/OPENAI\_API\_KEY 等
+    * `generate_hook.py`：从 SARIF 结果生成 `enter_hook.json` 和 `oracle.json`
+    * `generate_if.py`：从 SARIF 结果生成 `*-if.json`
+    * `generate_dsc.py`：从 SARIF 结果生成 `*-dsc.json`
+  * 输出结果：`output/<App>/oracle.json`、`output/<App>/<App>-if.json`、`output/<App>/enter_hook.json`、`output/<App>/<App>-dsc.json`
+* 目标程序仪器化（Instrumentation）
+  * 目的：把生成的规则文件加载到目标应用中，运行时追踪调用栈、Hook、Oracle 触发情况。
+  * 关键文件：`trace/cetracer.py`
+  * 说明：将 `enter_hook.json`、`oracle.json`、`*-if.json` 复制到目标程序运行环境，并在目标代码里调用 `cetracer.start_ce_trace(...)`
+* Fuzzing / 自动测试（Fuzzing）
+  * 目的：根据静态分析结果自动生成 payload，发送给目标 Agent，检测是否触发目标调用链。
+  * 入口脚本：`main.py`
+  * 批量运行：`batchmain.py` 会遍历 `output/<App>/oracle.json` 中的所有 call chain，逐个调用 `main.py`。
+  * 相关文件：
+    * `poc/poc_factory.py`：把应用名映射到 PoC 函数、容器名、生成的 JSON 文件路径
+    * `poc/<应用>/poc.py`：实现 `connect_with_auth(payload)`，负责将 payload 发送给目标 Agent（**浏览器模拟或直接请求**）
+    * `fuzzer.py`：核心 fuzzing 逻辑，计算候选 prompt、发送 payload、解析 call stack、判断是否触发目标
+    * `config/PromptTemplete.py`：用于生成和变异 prompt 的模板
+* 结果输出
+  * `main.py` 会打印最终的“exploration successful”结果和最终 prompt
+  * `batchmain.py` 会把多个 call chain 结果输出到 `log/` 下的日志文件
+
+
 
 ## ChainFuzzer
 
@@ -165,28 +193,4 @@ candidate tool chains + 数据传播路径标注 + 依赖类型（direct / indir
 
 
 
-1. 静态分析（Static analysis）
-   * 目的：用 CodeQL 扫描目标程序，生成漏洞相关的调用链、触发条件和约束信息。
-   * 入口脚本：`auto_analyze.py`
-   * 相关文件：
-     * `config/__init__.py`：配置 CodeQL 数据库路径、查询目录、OPENAI\_API\_BASE/OPENAI\_API\_KEY 等
-     * `generate_hook.py`：从 SARIF 结果生成 `enter_hook.json` 和 `oracle.json`
-     * `generate_if.py`：从 SARIF 结果生成 `*-if.json`
-     * `generate_dsc.py`：从 SARIF 结果生成 `*-dsc.json`
-   * 输出结果：`output/<App>/oracle.json`、`output/<App>/<App>-if.json`、`output/<App>/enter_hook.json`、`output/<App>/<App>-dsc.json`
-2. 目标程序仪器化（Instrumentation）
-   * 目的：把生成的规则文件加载到目标应用中，运行时追踪调用栈、Hook、Oracle 触发情况。
-   * 关键文件：`trace/cetracer.py`
-   * 说明：将 `enter_hook.json`、`oracle.json`、`*-if.json` 复制到目标程序运行环境，并在目标代码里调用 `cetracer.start_ce_trace(...)`
-3. Fuzzing / 自动测试（Fuzzing）
-   * 目的：根据静态分析结果自动生成 payload，发送给目标 Agent，检测是否触发目标调用链。
-   * 入口脚本：`main.py`
-   * 批量运行：`batchmain.py` 会遍历 `output/<App>/oracle.json` 中的所有 call chain，逐个调用 `main.py`。
-   * 相关文件：
-     * `poc/poc_factory.py`：把应用名映射到 PoC 函数、容器名、生成的 JSON 文件路径
-     * `poc/<应用>/poc.py`：实现 `connect_with_auth(payload)`，负责将 payload 发送给目标 Agent（**浏览器模拟或直接请求**）
-     * `fuzzer.py`：核心 fuzzing 逻辑，计算候选 prompt、发送 payload、解析 call stack、判断是否触发目标
-     * `config/PromptTemplete.py`：用于生成和变异 prompt 的模板
-4. 结果输出
-   * `main.py` 会打印最终的“exploration successful”结果和最终 prompt
-   * `batchmain.py` 会把多个 call chain 结果输出到 `log/` 下的日志文件
+1.
