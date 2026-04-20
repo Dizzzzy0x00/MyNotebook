@@ -56,6 +56,7 @@
 * [iotFuzz-2](fuzz/iotfuzz-2.md)
 * [iotFuzz-3](fuzz/iotfuzz-3.md)
 * [LLMFuzzer](fuzz/llmfuzzer.md)
+* [AgentProbe: Sink-Guided Tool-Chain Fuzzing for Multi-Tool Agents](fuzz/agentprobe-sink-guided-tool-chain-fuzzing-for-multi-tool-agents.md)
 
 ## AI-Attack
 
