@@ -103,30 +103,12 @@ ChainFuzzer已经把这个问题暴露得很明显：它先抽出 candidate tool
 
 **作用：** 面向源码识别高风险 sink，恢复可执行的候选 tool chain，并生成 Workflow IR。
 
-**分析对象：**
+由三个子模块组成（DeepAudit editor）
 
-* 工具注册代码
-* tool schema / 参数绑定逻辑
-* planner 到 tool 的映射关系
-* memory / context / store 传递
-* 文件、命令、网络、数据库、模板渲染等高危 sink
-* tool 间通过 artifact / memory / store 形成的数据依赖
-
-**新的核心职责：**
-
-* 从 source-to-sink 角度恢复跨工具依赖
-* 输出不仅包含“链存在”，还包含“链怎么被执行”
-* 标注每一步的前置状态、关键参数位点、可伪造返回值、目标 sink 条件
-* 为强制模式下的逐步 synthetic tool call 生成提供 IR 支撑
-
-**输出：**
-
-* Sink list
-* Candidate sink chains
-* Tool-dependency graph
-* Workflow IR
-* Step constraints
-* Mutation points
+* **Scouter Agent**：识别项目结构、框架、工具注册点、入口点、memory/store、artifact 和外部 side-effect 接口
+* **Static Chain Generator**：基于 AST、数据流和跨工具依赖生成 candidate sink chains
+* **Analysis Agent**：结合 RAG、局部 AST 片段和项目上下文，对 candidate chains 做语义筛选、风险解释和优先级排序
+* **输出**：top-k candidate executable sink chains + evidence-backed workflow IR
 
 ## 模块二：模糊测试模块
 
